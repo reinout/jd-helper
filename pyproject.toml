@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
 authors = [
-  { name = "Nelen & Schuurmans", email = "info@nelen-schuurmans.nl" },
+  { name = "Reinout van Rees", email = "reinout@vanrees.org" },
 ]
 keywords = []
 # Get classifier strings from http://www.python.org/pypi?%3Aaction=list_classifiers
