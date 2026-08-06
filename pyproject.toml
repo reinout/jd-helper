@@ -26,14 +26,6 @@ dev = ["pytest>=8.4.2", "pytest-cov>=6.3.0", "pytest-sugar>=1.1.1"]
 requires = ["setuptools>=80", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
-[tool.pyright]
-# Pyright/pylance/vscode configuration.
-# Note: if you want a different setup, you can overwrite this with a
-# "pyrightconfig.json", which takes precedence.
-include = "src"
-venvPath = "."
-venv = ".venv"
-
 [tool.pytest.ini_options]
 addopts = "--cov --cov-fail-under=80"
 # Debugging tests in vscode? Run pytest with "--no-cov", see
