@@ -16,6 +16,9 @@ dependencies = []
 [project.urls]
 homepage = "https://github.com/nens/jd-helper"
 
+[project.scripts]
+jdh = "jd_helper.main:main"
+
 [dependency-groups]
 # The "dev" group is automatically installed by uv. When using pip,
 # do something like "pip install -e . --group test".
