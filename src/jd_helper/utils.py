@@ -1,6 +1,7 @@
 from pathlib import Path
 
 JD_ROOT = Path("~/jd").expanduser()
+JDEX_ROOT = Path("~/jdex").expanduser()
 
 AREA_PATTERN = "[0-9]0_*"  # J0_
 CATEGORY_PATTERN = "[0-9][0-9]_*"  # JD_

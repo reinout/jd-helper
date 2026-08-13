@@ -3,10 +3,13 @@ import sys
 from functools import total_ordering
 from pathlib import Path
 
+from jinja2 import Environment, PackageLoader
 from rich import print
 from rich.tree import Tree
 
 from jd_helper import utils
+
+jinja_env = Environment(loader=PackageLoader("jd_helper", "templates"))
 
 
 @total_ordering
@@ -59,9 +62,9 @@ class Area(Base):
         return f"[link=file://{self.path}][bold green]:file_cabinet:  {self.number}[/][/] {self.title}"
 
 
-def read_folder_structure(jd_root: Path = utils.JD_ROOT) -> list[Area]:
+def read_folder_structure() -> list[Area]:
     areas: list[Area] = []
-    for area_path in jd_root.glob(utils.AREA_PATTERN):
+    for area_path in utils.JD_ROOT.glob(utils.AREA_PATTERN):
         area = Area(area_path)
         categories: list[Category] = []
         for category_path in area_path.glob(utils.CATEGORY_PATTERN):
@@ -77,17 +80,28 @@ def read_folder_structure(jd_root: Path = utils.JD_ROOT) -> list[Area]:
     return sorted(areas)
 
 
-def build_index(jd_root: Path = utils.JD_ROOT):
+def build_index():
     """Create an index.html and other adminstrativia"""
-    pass
+    index_root = utils.JDEX_ROOT
+    index_root.mkdir(exist_ok=True)
+    areas = read_folder_structure()
+    for area in areas:
+        area_dir = index_root / area.number
+        area_dir.mkdir(exist_ok=True)
+        for category in area.categories:
+            category_dir = area_dir / category.number
+            category_dir.mkdir(exist_ok=True)
+            for id in category.ids:
+                id_dir = category_dir / id.number
+                id_dir.mkdir(exist_ok=True)
 
 
-def print_index(jd_root: Path = utils.JD_ROOT):
-    """Create an index.html and other adminstrativia"""
+def print_index():
+    """Print the index (command line). This is the 'jdi' script."""
     selected: str | None = None
     if len(sys.argv) > 1:
         selected = sys.argv[1]
-    areas = read_folder_structure(jd_root)
+    areas = read_folder_structure()
     for area in areas:
         area_tree = Tree(area.rich_text)
         for category in area.categories:
@@ -98,8 +112,8 @@ def print_index(jd_root: Path = utils.JD_ROOT):
         print(area_tree)
 
 
-def find_number(number: str, jd_root: Path = utils.JD_ROOT) -> Base | None:
-    for area in read_folder_structure(jd_root):
+def find_number(number: str) -> Base | None:
+    for area in read_folder_structure():
         if area.number == number:
             return area
         for category in area.categories:
@@ -110,13 +124,14 @@ def find_number(number: str, jd_root: Path = utils.JD_ROOT) -> Base | None:
                     return id
 
 
-def cd_into_dir(jd_root: Path = utils.JD_ROOT):
-    """cd into area, category or id"""
+def cd_into_dir():
+    """cd into area, category or id, this is the 'jdcd' script."""
     parser = argparse.ArgumentParser(prog="jdcd")
     parser.add_argument("number")
     args = parser.parse_args(sys.argv[1:])
-    found = find_number(args.number, jd_root)
+    found = find_number(args.number)
     if not found:
         print(f"An area/category/id with number {args.number} was not found")
         sys.exit(1)
     print(f"cd {found.path}")
+    print(f"mc {found.path}")

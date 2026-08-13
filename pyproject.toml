@@ -12,6 +12,7 @@ keywords = []
 # Get classifier strings from http://www.python.org/pypi?%3Aaction=list_classifiers
 classifiers = ["Programming Language :: Python"]
 dependencies = [
+  "jinja2>=3.1.6",
   "rich>=15.0.0",
 ]
 
