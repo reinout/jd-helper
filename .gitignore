@@ -41,3 +41,4 @@ coverage.*
 docker-compose.override.yml
 
 ### Extra lines below are preserved ###
+/jdex.css

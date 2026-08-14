@@ -4,17 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-      {% block title %}
-        {{ title|striptags|e }} - JDEX
-      {% endblock %}
+      {{ page.title|striptags|e }} - JDEX
     </title>
     <link rel="stylesheet"
-          href="https://reinout.vanrees.org/_static/vanrees.css"
+          href="{{ page.url_to_root }}/jdex.css"
           type="text/css" />
   </head>
   <body>
     <div class="max-w-screen-xl px-4 m-auto">
 
+      {% block breadcrumbs %}
+        <div id="breadcrumbs">
+          {% for parent in page.parents %}
+            <a href="{{ page.url_to_root }}/{{ parent.as_toc_entry.url }}"
+               title="{{ parent.as_toc_entry.title }}">{{ parent.as_toc_entry.number }}</a>
+            <span class="breadcrumb-separator">→</span>
+          {% endfor %}
+          <span><b>{{ page.number }}</b>&nbsp; {{ page.title }}</span>
+        </div>
+      {% endblock %}
+
+
+      {% block full_width %}
+        <div class="grid grid-cols-[20em_auto]">
+          {% block toc %}
+            <ul>
+              {% for toc_entry in page.contents %}
+                <li><a href="{{ page.url_to_root }}/{{ toc_entry.url }}">
+                  <b>{{ toc_entry.number }}</b> {{ toc_entry.title }}
+                </a></li>
+              {% endfor %}
+            </ul>
+          {% endblock %}
+          <div class="prose prose-vanrees">
+            {% block main %}{% endblock %}
+          </div>
+        </div>
+      {% endblock %}
     </div>
 
   </body>
