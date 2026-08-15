@@ -39,12 +39,17 @@ class Pointer:
     @property
     def link(self) -> str:
         """Return link, suitable for html"""
-        return f"<a href='{self.uri}'>{self.name or 'link'}</a>"
+        return str(self)
 
 
 @register_schemes
 class URLPointer(Pointer):
     schemes = ["https"]
+
+    @property
+    def link(self) -> str:
+        """Return link, suitable for html"""
+        return f"<a href='{self.uri}'>{self.name or 'link'}</a>"
 
 
 @register_schemes
@@ -69,14 +74,19 @@ class BujoPointer(Pointer):
 
     @property
     def location(self):
-        return self.splitted.netloc
+        number = int(self.splitted.netloc)
+        if number >= 100:
+            number -= 100
+            return f"grote BuJo {number:03}"
+        else:
+            return f"kleine BuJo {number:03}"
 
     @property
-    def label(self):
+    def page_number(self):
         return self.splitted.path.lstrip("/")
 
     def __str__(self):
-        return f"bujo {self.location}: '{self.label}'"
+        return f"{self.location}: pagina {self.page_number}"
 
 
 def from_uri(uri, name: str | None = None) -> Pointer:
