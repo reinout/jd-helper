@@ -37,7 +37,7 @@ class Base:
 
         else:
             # Root, custom case
-            self.number = "JDEX"
+            self.number = "JD"
             self.title = ""
             self.absolute_url_base = ""
 
@@ -67,7 +67,7 @@ class Base:
         return utils.Page(
             number=self.number,
             title=self.title,
-            contents=self.contents,
+            toc_contents=self.toc_contents,
             url_to_root=self.url_to_root or ".",
             parents=self.parents,
         )
@@ -78,7 +78,7 @@ class Base:
         return "/".join([".."] * levels_to_root)
 
     @property
-    def contents(self) -> list[utils.TocEntry]:
+    def toc_contents(self) -> list[utils.TocEntry]:
         return []
 
     @property
@@ -98,6 +98,16 @@ class ID(Base):
     def rich_text(self):
         return f"[link=file://{self.path}][bold white]:file_folder: {self.number}[/][/] {self.title}"
 
+    @property
+    def toc_contents(self) -> list[utils.TocEntry]:
+        # List our parent area's ids.
+        our_category: Category = self.parent
+        toc_entries = [id.as_toc_entry for id in our_category.ids]
+        for toc_entry in toc_entries:
+            if toc_entry.number == self.number:
+                toc_entry.selected = True
+        return toc_entries
+
 
 class Category(Base):
     ids: list[ID]
@@ -107,7 +117,7 @@ class Category(Base):
         return f"[link=file://{self.path}][bold yellow]:card_file_box:  {self.number}[/][/] {self.title}"
 
     @property
-    def contents(self) -> list[utils.TocEntry]:
+    def toc_contents(self) -> list[utils.TocEntry]:
         return [id.as_toc_entry for id in self.ids]
 
 
@@ -119,7 +129,7 @@ class Area(Base):
         return f"[link=file://{self.path}][bold green]:file_cabinet:  {self.number}[/][/] {self.title}"
 
     @property
-    def contents(self) -> list[utils.TocEntry]:
+    def toc_contents(self) -> list[utils.TocEntry]:
         return [category.as_toc_entry for category in self.categories]
 
 
@@ -127,7 +137,7 @@ class Root(Base):
     areas: list[Area]
 
     @property
-    def contents(self) -> list[utils.TocEntry]:
+    def toc_contents(self) -> list[utils.TocEntry]:
         return [area.as_toc_entry for area in self.areas]
 
     @property

@@ -14,12 +14,13 @@ class TocEntry:
     number: str
     title: str
     url: str  # relative
+    selected: bool = False
 
 
 @dataclass
 class Page:
     number: str
     title: str
-    contents: list[TocEntry]
+    toc_contents: list[TocEntry]
     url_to_root: str
     parents: list

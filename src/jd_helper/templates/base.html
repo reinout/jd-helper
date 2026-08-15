@@ -28,9 +28,10 @@
       {% block full_width %}
         <div class="grid grid-cols-[20em_auto]">
           {% block toc %}
-            <ul>
-              {% for toc_entry in page.contents %}
-                <li><a href="{{ page.url_to_root }}/{{ toc_entry.url }}">
+            <ul id="toc">
+              {% for toc_entry in page.toc_contents %}
+                <li><a href="{{ page.url_to_root }}/{{ toc_entry.url }}"
+                    {% if toc_entry.selected %}class="selected"{% endif %}>
                   <b>{{ toc_entry.number }}</b> {{ toc_entry.title }}
                 </a></li>
               {% endfor %}

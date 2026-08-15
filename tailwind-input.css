@@ -87,23 +87,27 @@
            prose-dt:mt-0 prose-p:mt-0 prose-dd:mt-0 prose-li:mt-0 prose-dl:mt-0;
 }
 
+/* General formatting */
 pre { max-width: 90vw };
+a {
+  @apply link text-secondary;
+}
 
+/* Breadcrumbs */
 #breadcrumbs {
   @apply text-xl pt-2 pb-2 mb-4;
   @apply border-b-primary border-b-4;
 }
-
 #breadcrumbs a,
 #breadcrumbs span {
   @apply inline-block;
   @apply p-4 first:pl-0;
 }
-
 #breadcrumbs span.breadcrumb-separator {
   @apply p-0;
 }
 
-a {
-  @apply link;
+/* TOC */
+#toc a.selected {
+  @apply text-secondary-content bg-secondary;
 }
