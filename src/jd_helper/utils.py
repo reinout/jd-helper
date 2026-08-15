@@ -18,7 +18,13 @@ class TocEntry:
     number: str
     title: str
     url: str  # relative
-    selected: bool = False
+
+
+@dataclass
+class FilelistingEntry:
+    name: str
+    description: str
+    url: str  # relative
 
 
 @dataclass

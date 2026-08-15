@@ -30,11 +30,21 @@
           {% block toc %}
             <ul id="toc">
               {% for toc_entry in page.toc_contents %}
-                <li><a href="{{ page.url_to_root }}/{{ toc_entry.url }}"
-                    {% if toc_entry.selected %}class="selected"{% endif %}>
+                <li><a href="{{ page.url_to_root }}/{{ toc_entry.url }}">
                   <b>{{ toc_entry.number }}</b> {{ toc_entry.title }}
                 </a></li>
               {% endfor %}
+              {% for document in documents %}
+                <li>
+                  <a href="{{ page.url_to_root }}/{{ absolute_url_base }}/{{ document.html_filename }}"
+                     title="{{ document.description }}"
+                     {% if document.filename == current_document.filename %}class="selected"{% endif %}
+                  >
+                    {{ document.filename }}
+                  </a>
+                </li>
+              {% endfor %}
+
             </ul>
           {% endblock %}
           <div class="prose prose-vanrees">

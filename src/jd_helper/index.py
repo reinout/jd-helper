@@ -1,13 +1,13 @@
 import argparse
 import sys
-from functools import total_ordering
+from functools import cached_property, total_ordering
 from pathlib import Path
 
 from jinja2 import Environment, PackageLoader
 from rich import print
 from rich.tree import Tree
 
-from jd_helper import pointers, utils
+from jd_helper import documents, pointers, utils
 
 jinja_env = Environment(loader=PackageLoader("jd_helper", "templates"))
 
@@ -108,16 +108,6 @@ class ID(Base):
     def rich_text(self):
         return f"[link=file://{self.path}][bold white]:file_folder: {self.number}[/][/] {self.title}"
 
-    # @property
-    # def toc_contents(self) -> list[utils.TocEntry]:
-    #     # List our parent area's ids.
-    #     our_category: Category = self.parent
-    #     toc_entries = [id.as_toc_entry for id in our_category.ids]
-    #     for toc_entry in toc_entries:
-    #         if toc_entry.number == self.number:
-    #             toc_entry.selected = True
-    #     return toc_entries
-
     @property
     def links(self) -> list[pointers.Pointer]:
         return pointers.pointers_from_file(self.path / "links.txt")
@@ -125,6 +115,15 @@ class ID(Base):
     @property
     def locations(self) -> list[pointers.Pointer]:
         return pointers.pointers_from_file(self.path / "locations.txt")
+
+    @cached_property
+    def documents(self) -> list[documents.Document]:
+        return documents.find_documents(self.path)
+
+    @property
+    def toc_contents(self) -> list[utils.TocEntry]:
+        # Just return ourselves, in front of the documents.
+        return [self.as_toc_entry]
 
 
 class Category(Base):
@@ -192,6 +191,7 @@ def build_index():
     index_root = utils.JDEX_ROOT
     index_root.mkdir(exist_ok=True)
     page_template = jinja_env.get_template("page.html")
+    document_template = jinja_env.get_template("document.html")
 
     root = read_folder_structure()
     index = index_root / "index.html"
@@ -216,8 +216,23 @@ def build_index():
                 id_dir = category_dir / id.number
                 id_dir.mkdir(exist_ok=True)
                 index = id_dir / "index.html"
-                content = page_template.render(page=id.as_page)
+                content = page_template.render(
+                    page=id.as_page,
+                    absolute_url_base=id.absolute_url_base,
+                    documents=id.documents,
+                    current_document=None,
+                )
                 index.write_text(content)
+
+                for document in id.documents:
+                    target = id_dir / document.html_filename
+                    content = document_template.render(
+                        page=id.as_page,
+                        absolute_url_base=id.absolute_url_base,
+                        documents=id.documents,
+                        current_document=document,
+                    )
+                    target.write_text(content)
 
 
 def print_index():

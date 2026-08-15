@@ -84,11 +84,11 @@
 .prose-vanrees {
     @apply prose-headings:text-primary prose-a:text-secondary prose-a:link
            prose-headings:mb-2 prose-li:mb-0
-           prose-dt:mt-0 prose-p:mt-0 prose-dd:mt-0 prose-li:mt-0 prose-dl:mt-0;
+           prose-dt:mt-0 prose-p:mt-0 prose-dd:mt-0 prose-li:mt-0 prose-dl:mt-0
+           max-w-full;
 }
 
 /* General formatting */
-pre { max-width: 90vw };
 a {
   @apply link text-secondary;
 }
