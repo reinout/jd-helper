@@ -106,6 +106,9 @@ a {
 #breadcrumbs span.breadcrumb-separator {
   @apply p-0;
 }
+#breadcrumbs span.main-selection-title {
+  @apply text-primary;
+}
 
 /* TOC */
 #toc a.selected {

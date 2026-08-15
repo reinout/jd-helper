@@ -6,6 +6,7 @@
 # I also want to read/generate them from lines in links.txt and locations.txt.
 from __future__ import annotations
 
+from pathlib import Path
 from urllib.parse import SplitResult, urlsplit
 
 
@@ -26,19 +27,24 @@ class Pointer:
     schemes: list[str] = []
     splitted: SplitResult
 
-    def __init__(self, uri: str, description: str | None = None):
+    def __init__(self, uri: str, name: str | None = None):
         self.uri = uri
-        self.description = description
+        self.name = name
         self.splitted = urlsplit(uri)
         assert self.splitted.scheme in self.schemes
+
+    def __str__(self):
+        return self.uri
+
+    @property
+    def link(self) -> str:
+        """Return link, suitable for html"""
+        return f"<a href='{self.uri}'>{self.name or 'link'}</a>"
 
 
 @register_schemes
 class URLPointer(Pointer):
     schemes = ["https"]
-
-    def __str__(self):
-        return self.uri
 
 
 @register_schemes
@@ -57,17 +63,41 @@ class HangmapPointer(Pointer):
         return f"hangmap {self.location}: '{self.label}'"
 
 
-def from_uri(uri, description: str | None = None) -> Pointer:
+@register_schemes
+class BujoPointer(Pointer):
+    schemes = ["bujo"]
+
+    @property
+    def location(self):
+        return self.splitted.netloc
+
+    @property
+    def label(self):
+        return self.splitted.path.lstrip("/")
+
+    def __str__(self):
+        return f"bujo {self.location}: '{self.label}'"
+
+
+def from_uri(uri, name: str | None = None) -> Pointer:
     scheme, rest = uri.split("://")
     if scheme not in scheme_registry:
         raise UnknownSchemeError(f"Scheme {scheme} not registered")
     cls = scheme_registry[scheme]
-    return cls(uri, description)
+    return cls(uri, name)
 
 
 def line_to_pointer(line: str) -> Pointer:
     if " " in line:
-        uri, description = line.split(" ", 1)
-        return from_uri(uri, description)
+        uri, name = line.split(" ", 1)
+        return from_uri(uri, name)
     else:
         return from_uri(line)
+
+
+def pointers_from_file(pointer_file: Path) -> list[Pointer]:
+    """Return pointers from file. Ok if file doesn't exist."""
+    if not pointer_file.exists():
+        return []
+    lines = pointer_file.read_text().split("\n")
+    return [line_to_pointer(line) for line in lines if line.strip()]

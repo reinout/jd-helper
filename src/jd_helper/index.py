@@ -7,7 +7,7 @@ from jinja2 import Environment, PackageLoader
 from rich import print
 from rich.tree import Tree
 
-from jd_helper import utils
+from jd_helper import pointers, utils
 
 jinja_env = Environment(loader=PackageLoader("jd_helper", "templates"))
 
@@ -70,6 +70,8 @@ class Base:
             toc_contents=self.toc_contents,
             url_to_root=self.url_to_root or ".",
             parents=self.parents,
+            links=self.links,
+            locations=self.locations,
         )
 
     @property
@@ -92,21 +94,37 @@ class Base:
         result.reverse()
         return result
 
+    @property
+    def links(self) -> list[pointers.Pointer]:
+        return []
+
+    @property
+    def locations(self) -> list[pointers.Pointer]:
+        return []
+
 
 class ID(Base):
     @property
     def rich_text(self):
         return f"[link=file://{self.path}][bold white]:file_folder: {self.number}[/][/] {self.title}"
 
+    # @property
+    # def toc_contents(self) -> list[utils.TocEntry]:
+    #     # List our parent area's ids.
+    #     our_category: Category = self.parent
+    #     toc_entries = [id.as_toc_entry for id in our_category.ids]
+    #     for toc_entry in toc_entries:
+    #         if toc_entry.number == self.number:
+    #             toc_entry.selected = True
+    #     return toc_entries
+
     @property
-    def toc_contents(self) -> list[utils.TocEntry]:
-        # List our parent area's ids.
-        our_category: Category = self.parent
-        toc_entries = [id.as_toc_entry for id in our_category.ids]
-        for toc_entry in toc_entries:
-            if toc_entry.number == self.number:
-                toc_entry.selected = True
-        return toc_entries
+    def links(self) -> list[pointers.Pointer]:
+        return pointers.pointers_from_file(self.path / "links.txt")
+
+    @property
+    def locations(self) -> list[pointers.Pointer]:
+        return pointers.pointers_from_file(self.path / "locations.txt")
 
 
 class Category(Base):

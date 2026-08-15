@@ -1,5 +1,9 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from jd_helper.pointers import Pointer
 
 JD_ROOT = Path("~/jd").expanduser()
 JDEX_ROOT = Path("~/jdex").expanduser()
@@ -24,3 +28,5 @@ class Page:
     toc_contents: list[TocEntry]
     url_to_root: str
     parents: list
+    links: list[Pointer]
+    locations: list[Pointer]
