@@ -51,6 +51,10 @@ class Base:
         return self.identifier < other.identifier
 
     @property
+    def jdex_path(self):
+        return utils.JDEX_ROOT / self.absolute_url_base / "index.html"
+
+    @property
     def rich_text(self):
         return str(self)
 
@@ -106,7 +110,7 @@ class Base:
 class ID(Base):
     @property
     def rich_text(self):
-        return f"[link=file://{self.path}][bold white]:file_folder: {self.number}[/][/] {self.title}"
+        return f"[link=file://{self.jdex_path}][bold white]:file_folder: {self.number}[/][/] {self.title}"
 
     @property
     def links(self) -> list[pointers.Pointer]:
@@ -131,7 +135,7 @@ class Category(Base):
 
     @property
     def rich_text(self):
-        return f"[link=file://{self.path}][bold yellow]:card_file_box:  {self.number}[/][/] {self.title}"
+        return f"[link=file://{self.jdex_path}][bold yellow]:card_file_box:  {self.number}[/][/] {self.title}"
 
     @property
     def toc_contents(self) -> list[utils.TocEntry]:
@@ -143,7 +147,7 @@ class Area(Base):
 
     @property
     def rich_text(self):
-        return f"[link=file://{self.path}][bold green]:file_cabinet:  {self.number}[/][/] {self.title}"
+        return f"[link=file://{self.jdex_path}][bold green]:file_cabinet:  {self.number}[/][/] {self.title}"
 
     @property
     def toc_contents(self) -> list[utils.TocEntry]:
