@@ -12,7 +12,10 @@ keywords = []
 # Get classifier strings from http://www.python.org/pypi?%3Aaction=list_classifiers
 classifiers = ["Programming Language :: Python"]
 dependencies = [
+  "docutils>=0.23",
   "jinja2>=3.1.6",
+  "linkify-it-py>=2.1.0",
+  "markdown-it-py>=4.2.0",
   "rich>=15.0.0",
 ]
 

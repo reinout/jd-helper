@@ -1,8 +1,8 @@
-# find_documents
-# Find folders?
-# file:// urls (ook voor PDFs?)
 from functools import total_ordering
 from pathlib import Path
+
+from docutils.core import publish_parts
+from markdown_it import MarkdownIt
 
 SPECIAL_FILENAMES = ["links.txt", "locations.txt", "index.md"]
 
@@ -30,7 +30,9 @@ class Document:
     @property
     def rendered(self):
         content = self.path.read_text()
-        return f"<pre>{content}</pre>"
+        # Md rendering is also OK for .txt, so I use it as the default.
+        md = MarkdownIt("gfm-like2")
+        return md.render(content)
 
 
 class MdDocument(Document):
@@ -38,7 +40,11 @@ class MdDocument(Document):
 
 
 class RstDocument(Document):
-    pass
+    @property
+    def rendered(self):
+        content = self.path.read_text()
+        parts = publish_parts(content, writer_name="html5")
+        return parts["html_body"]
 
 
 class TxtDocument(Document):
