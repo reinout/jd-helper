@@ -29,20 +29,24 @@ class Document:
 
     @property
     def rendered(self):
-        content = self.path.read_text()
-        # Md rendering is also OK for .txt, so I use it as the default.
-        md = MarkdownIt("gfm-like2")
-        return md.render(content)
+        content = self.path.read_text(errors="replace")
+        lines = content.split("\n")
+        rendered_lines = [f"<div>{line}</div>" for line in lines]
+        return "\n".join(rendered_lines)
 
 
 class MdDocument(Document):
-    pass
+    @property
+    def rendered(self):
+        content = self.path.read_text(errors="replace")
+        md = MarkdownIt("gfm-like2")
+        return md.render(content)
 
 
 class RstDocument(Document):
     @property
     def rendered(self):
-        content = self.path.read_text()
+        content = self.path.read_text(errors="replace")
         parts = publish_parts(content, writer_name="html5")
         return parts["html_body"]
 
