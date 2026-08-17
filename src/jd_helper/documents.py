@@ -1,4 +1,4 @@
-from functools import total_ordering
+from functools import cached_property, total_ordering
 from pathlib import Path
 
 from docutils.core import publish_parts
@@ -27,27 +27,28 @@ class Document:
     def __lt__(self, other):
         return self.filename < other.filename
 
+    @cached_property
+    def content(self) -> str:
+        return self.path.read_text(errors="replace")
+
     @property
-    def rendered(self):
-        content = self.path.read_text(errors="replace")
-        lines = content.split("\n")
-        rendered_lines = [f"<div>{line}</div>" for line in lines]
-        return "\n".join(rendered_lines)
+    def rendered(self) -> str:
+        # Default: plain text handling.
+        lines = self.content.split("\n")
+        return "\n".join([f"<div>{line}</div>" for line in lines])
 
 
 class MdDocument(Document):
     @property
     def rendered(self):
-        content = self.path.read_text(errors="replace")
         md = MarkdownIt("gfm-like2")
-        return md.render(content)
+        return md.render(self.content)
 
 
 class RstDocument(Document):
     @property
     def rendered(self):
-        content = self.path.read_text(errors="replace")
-        parts = publish_parts(content, writer_name="html5")
+        parts = publish_parts(self.content, writer_name="html5")
         return parts["html_body"]
 
 
