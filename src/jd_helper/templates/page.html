@@ -2,7 +2,12 @@
 
 
 {% block main %}
-  <h1>{{ page.number }} {{ page.title }}</h1>
+  {% if page.index_document %}
+    {{ page.index_document.rendered }}
+  {% else %}
+    <h1>{{ page.number }} {{ page.title }}</h1>
+  {% endif %}
+
   {% if page.locations %}
     <h2>Locaties</h2>
     <ul>

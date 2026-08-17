@@ -76,6 +76,7 @@ class Base:
             parents=self.parents,
             links=self.links,
             locations=self.locations,
+            index_document=self.index_document,
         )
 
     @property
@@ -97,6 +98,12 @@ class Base:
             current = current.parent
         result.reverse()
         return result
+
+    @property
+    def index_document(self) -> documents.Document | None:
+        possible_index = self.path / "index.md"
+        if possible_index.exists():
+            return documents.MdDocument(possible_index)
 
     @property
     def links(self) -> list[pointers.Pointer]:
