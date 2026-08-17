@@ -256,7 +256,7 @@ def print_index():
         area_tree = Tree(area.rich_text)
         for category in area.categories:
             category_tree = area_tree.add(category.rich_text)
-            if selected and selected == category.number:
+            if selected and selected in [area.number, category.number]:
                 for id in category.ids:
                     category_tree.add(id.rich_text)
         print(area_tree)
