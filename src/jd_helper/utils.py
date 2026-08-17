@@ -35,6 +35,6 @@ class Page:
     toc_contents: list[TocEntry]
     url_to_root: str
     parents: list
-    links: list[Pointer]
-    locations: list[Pointer]
-    index_document: Document | None = None
+    links: list["Pointer"]
+    locations: list["Pointer"]
+    index_document: "Document | None" = None
