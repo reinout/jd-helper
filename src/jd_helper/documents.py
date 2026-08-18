@@ -1,3 +1,4 @@
+import logging
 from functools import cached_property, total_ordering
 from pathlib import Path
 
@@ -5,6 +6,8 @@ from docutils.core import publish_parts
 from markdown_it import MarkdownIt
 
 SPECIAL_FILENAMES = ["links.txt", "locations.txt", "index.md"]
+
+logger = logging.getLogger(__name__)
 
 
 @total_ordering
@@ -48,6 +51,7 @@ class MdDocument(Document):
 class RstDocument(Document):
     @property
     def rendered(self):
+        logger.debug(f"Rendering {self.path}")
         parts = publish_parts(self.content, writer_name="html5")
         return parts["html_body"]
 
