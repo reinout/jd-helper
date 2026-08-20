@@ -53,6 +53,20 @@ class URLPointer(Pointer):
 
 
 @register_schemes
+class JdPointer(Pointer):
+    schemes = ["jd"]
+
+    @property
+    def number(self) -> str:
+        return self.splitted.netloc
+
+    # TODO: link, but that depends on index.py's find_number()... Chicken/egg.
+
+    def __str__(self):
+        return f"JD '{self.number}'"
+
+
+@register_schemes
 class HangmapPointer(Pointer):
     schemes = ["hangmap"]
 
