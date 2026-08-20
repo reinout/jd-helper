@@ -107,25 +107,17 @@ class Base:
 
     @property
     def links(self) -> list[pointers.Pointer]:
-        return []
+        return pointers.pointers_from_file(self.path / "links.txt")
 
     @property
     def locations(self) -> list[pointers.Pointer]:
-        return []
+        return pointers.pointers_from_file(self.path / "locations.txt")
 
 
 class ID(Base):
     @property
     def rich_text(self):
         return f"[link=file://{self.jdex_path}][bold white]:file_folder: {self.number}[/][/] {self.title}"
-
-    @property
-    def links(self) -> list[pointers.Pointer]:
-        return pointers.pointers_from_file(self.path / "links.txt")
-
-    @property
-    def locations(self) -> list[pointers.Pointer]:
-        return pointers.pointers_from_file(self.path / "locations.txt")
 
     @cached_property
     def documents(self) -> list[documents.Document]:
