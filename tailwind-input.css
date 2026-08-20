@@ -12,7 +12,7 @@
 
 @plugin "daisyui/theme" {
   name: "reinoutlight";
-  default: true;
+  default: false;
   prefersdark: false;
   color-scheme: "light";
   --color-base-100: oklch(100% 0 0);
@@ -48,7 +48,7 @@
 
 @plugin "daisyui/theme" {
   name: "reinoutdark";
-  default: false;
+  default: true;
   prefersdark: true;
   color-scheme: "dark";
   --color-base-100: oklch(25.33% 0.016 252.42);
