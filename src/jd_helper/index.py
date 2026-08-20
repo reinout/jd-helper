@@ -7,7 +7,7 @@ from jinja2 import Environment, PackageLoader
 from rich import print
 from rich.tree import Tree
 
-from jd_helper import documents, pointers, utils
+from jd_helper import documents, folders_files, pointers, utils
 
 jinja_env = Environment(loader=PackageLoader("jd_helper", "templates"))
 
@@ -123,6 +123,14 @@ class ID(Base):
     def documents(self) -> list[documents.Document]:
         return documents.find_documents(self.path)
 
+    @cached_property
+    def folders(self) -> list[folders_files.Folder]:
+        return folders_files.find_folders(self.path)
+
+    @cached_property
+    def files(self) -> list[folders_files.File]:
+        return folders_files.find_files(self.path)
+
     @property
     def toc_contents(self) -> list[utils.TocEntry]:
         # Just return ourselves, in front of the documents.
@@ -223,6 +231,8 @@ def build_index():
                     page=id.as_page,
                     absolute_url_base=id.absolute_url_base,
                     documents=id.documents,
+                    folders=id.folders,
+                    files=id.files,
                     current_document=None,
                 )
                 index.write_text(content)
