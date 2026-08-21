@@ -23,7 +23,7 @@ dependencies = [
 homepage = "https://github.com/nens/jd-helper"
 
 [project.scripts]
-jdcd = "jd_helper.index:cd_into_dir"
+jdcd = "jd_helper.scripts:jdcd"
 jdh = "jd_helper.main:main"
 jdi = "jd_helper.scripts:jdi"
 

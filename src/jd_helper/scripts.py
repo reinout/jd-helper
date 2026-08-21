@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 import sys
@@ -28,3 +29,12 @@ def jdi():
     if len(sys.argv) > 1:
         selected = sys.argv[1]
     application.print_index_to_console(jd_root=JD_ROOT, selected=selected)
+
+
+def jdcd():
+    """cd into area, category or id, this is the 'jdcd' script."""
+    _setup_logging()
+    parser = argparse.ArgumentParser(prog="jdcd")
+    parser.add_argument("number")
+    args = parser.parse_args(sys.argv[1:])
+    application.print_cd_into_dir(jd_root=JD_ROOT, number=args.number)

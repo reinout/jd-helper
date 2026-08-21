@@ -1,11 +1,7 @@
-import argparse
-import sys
 from functools import cached_property, total_ordering
 from pathlib import Path
 
 from jinja2 import Environment, PackageLoader
-from rich import print
-from rich.tree import Tree
 
 from jd_helper import documents, folders_files, pointers, utils
 
@@ -53,10 +49,6 @@ class Base:
     @property
     def jdex_path(self):
         return utils.JDEX_ROOT / self.absolute_url_base / "index.html"
-
-    @property
-    def rich_text(self):
-        return str(self)
 
     @property
     def as_toc_entry(self) -> utils.TocEntry:
@@ -115,10 +107,6 @@ class Base:
 
 
 class ID(Base):
-    @property
-    def rich_text(self):
-        return f"[link=file://{self.jdex_path}][bold white]:file_folder: {self.number}[/][/] {self.title}"
-
     @cached_property
     def documents(self) -> list[documents.Document]:
         return documents.find_documents(self.path)
@@ -141,20 +129,12 @@ class Category(Base):
     ids: list[ID]
 
     @property
-    def rich_text(self):
-        return f"[link=file://{self.jdex_path}][bold yellow]:card_file_box:  {self.number}[/][/] {self.title}"
-
-    @property
     def toc_contents(self) -> list[utils.TocEntry]:
         return [id.as_toc_entry for id in self.ids]
 
 
 class Area(Base):
     categories: list[Category]
-
-    @property
-    def rich_text(self):
-        return f"[link=file://{self.jdex_path}][bold green]:file_cabinet:  {self.number}[/][/] {self.title}"
 
     @property
     def toc_contents(self) -> list[utils.TocEntry]:
@@ -246,45 +226,3 @@ def build_index():
                         current_document=document,
                     )
                     target.write_text(content)
-
-
-def print_index():
-    """Print the index (command line). This is the 'jdi' script."""
-    selected: str | None = None
-    if len(sys.argv) > 1:
-        selected = sys.argv[1]
-    root = read_folder_structure()
-    for area in root.areas:
-        area_tree = Tree(area.rich_text)
-        for category in area.categories:
-            category_tree = area_tree.add(category.rich_text)
-            if selected and selected in [area.number, category.number]:
-                for id in category.ids:
-                    category_tree.add(id.rich_text)
-        print(area_tree)
-
-
-def find_number(number: str) -> Base | None:
-    root = read_folder_structure()
-    for area in root.areas:
-        if area.number == number:
-            return area
-        for category in area.categories:
-            if category.number == number:
-                return category
-            for id in category.ids:
-                if id.number == number:
-                    return id
-
-
-def cd_into_dir():
-    """cd into area, category or id, this is the 'jdcd' script."""
-    parser = argparse.ArgumentParser(prog="jdcd")
-    parser.add_argument("number")
-    args = parser.parse_args(sys.argv[1:])
-    found = find_number(args.number)
-    if not found:
-        print(f"An area/category/id with number {args.number} was not found")
-        sys.exit(1)
-    print(f"cd {found.path}")
-    print(f"mc {found.path}")
