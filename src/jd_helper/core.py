@@ -1,57 +1,70 @@
 import re
 from dataclasses import dataclass, field
-from enum import Enum
+from pathlib import Path
 
 AREA_REGEX = re.compile(r"\d0")
 CATEGORY_REGEX = re.compile(r"\d[1-9]")
 ID_REGEX = re.compile(r"\d[1-9]\.\d\d")
 
 
-class UnknownKindError(Exception):
-    pass
-
-
-class Kind(Enum):
-    AREA = 1
-    CATEGORY = 2
-    ID = 3
-
-
-def detect_kind(number: str) -> Kind:
-    if AREA_REGEX.fullmatch(number):
-        return Kind.AREA
-    if CATEGORY_REGEX.fullmatch(number):
-        return Kind.CATEGORY
-    if ID_REGEX.fullmatch(number):
-        return Kind.ID
-    raise UnknownKindError(f"Number {number} not detected as JD item")
+@dataclass
+class Location:
+    uri: str
+    description: str | None = None
 
 
 @dataclass
-class JDItem:
+class Base:
     number: str
     title: str = ""
-    kind: Kind = field(init=False)
+    path: Path | None = None
+
+
+@dataclass
+class Area(Base):
+    category_keys: list[str] = field(default_factory=list)
 
     def __post_init__(self):
-        self.kind = detect_kind(self.number)
+        assert AREA_REGEX.fullmatch(self.number)
+
+
+@dataclass
+class Category(Base):
+    id_keys: list[str] = field(default_factory=list)
+
+    def __post_init__(self):
+        assert CATEGORY_REGEX.fullmatch(self.number)
+
+
+@dataclass
+class ID(Base):
+    locations: list[Location] = field(default_factory=list)
+
+    def __post_init__(self):
+        assert ID_REGEX.fullmatch(self.number)
 
 
 class JDStructure:
-    areas: dict[str, JDItem]
-    categories: dict[str, JDItem]
-    ids: dict[str, JDItem]
+    areas: dict[str, Area]
+    categories: dict[str, Category]
+    ids: dict[str, ID]
 
     def __init__(self):
         self.areas = {}
         self.categories = {}
         self.ids = {}
 
-    def add_jd_item(self, jd_item: JDItem):
-        match jd_item.kind:
-            case Kind.AREA:
-                self.areas[jd_item.number] = jd_item
-            case Kind.CATEGORY:
-                self.categories[jd_item.number] = jd_item
-            case Kind.ID:
-                self.ids[jd_item.number] = jd_item
+    def add_area(self, area: Area):
+        self.areas[area.number] = area
+
+    def add_category(self, category: Category):
+        self.categories[category.number] = category
+        area_number = category.number[0] + "0"
+        area = self.areas[area_number]
+        area.category_keys.append(category.number)
+
+    def add_id(self, id: ID):
+        self.ids[id.number] = id
+        category_number = id.number[:2]
+        category = self.categories[category_number]
+        category.id_keys.append(id.number)
