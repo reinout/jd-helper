@@ -33,3 +33,19 @@ def read_folder_structure(root: Path) -> core.JDStructure:
                 jd_structure.add_id(id)
 
     return jd_structure
+
+
+def uri_and_title_from_line(line: str) -> tuple[str, str | None]:
+    if " " in line:
+        uri, title = line.split(" ", 1)
+        return uri, title
+    else:
+        return line, None
+
+
+def uris_and_titles_from_file(uri_file: Path) -> list[tuple[str, str | None]]:
+    """Return pointers from file. Ok if file doesn't exist."""
+    if not uri_file.exists():
+        return []
+    lines = uri_file.read_text().split("\n")
+    return [uri_and_title_from_line(line) for line in lines if line.strip()]
