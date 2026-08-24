@@ -1,0 +1,9 @@
+{% extends "base2.html" %}
+
+{% block toc %}
+  <div id="toc"">
+    {% for link in links %}
+      <div>{{ link }}</div>
+    {% endfor %}
+  </div>
+{% endblock %}

@@ -24,7 +24,7 @@ homepage = "https://github.com/nens/jd-helper"
 
 [project.scripts]
 jdcd = "jd_helper.scripts:jdcd"
-jdh = "jd_helper.main:main"
+jdh = "jd_helper.scripts:jdh"
 jdi = "jd_helper.scripts:jdi"
 
 [dependency-groups]

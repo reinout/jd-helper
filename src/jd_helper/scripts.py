@@ -38,3 +38,9 @@ def jdcd():
     parser.add_argument("number")
     args = parser.parse_args(sys.argv[1:])
     application.print_cd_into_dir(jd_root=JD_ROOT, number=args.number)
+
+
+def jdh():
+    """Print the full html output, this is the 'jdh' script."""
+    _setup_logging()
+    application.export_html_pages(jd_root=JD_ROOT)

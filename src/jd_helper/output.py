@@ -1,19 +1,23 @@
+import logging
+from dataclasses import dataclass
 from functools import singledispatch
 from pathlib import Path
+
+from jinja2 import Environment, PackageLoader
 
 from jd_helper import core
 
 JDEX_ROOT = Path("~/jdex").expanduser()
 
+logger = logging.getLogger()
+jinja_env = Environment(loader=PackageLoader("jd_helper", "templates"))
 
-@singledispatch
-def html_path(obj: core.Base) -> Path:
+
+def html_path(obj: core.Base | None = None) -> Path:
+    if obj is None:
+        # Root of the site.
+        return JDEX_ROOT / "index.html"
     return JDEX_ROOT / f"{obj.number}.html"
-
-
-@html_path.register
-def _(obj: core.ID):
-    return JDEX_ROOT / obj.number / "index.html"
 
 
 @singledispatch
@@ -37,3 +41,40 @@ def _(obj: core.Category):
 def _(obj: core.ID):
     target = str(html_path(obj))
     return f"[link=file://{target}][bold white]:file_folder: {obj.number}[/][/] {obj.title}"
+
+
+@singledispatch
+def link(obj: core.Base) -> str:
+    """Return link suitable for html"""
+    # TODO: numbers as fixed width font?
+    return f"<a href='{html_path(obj)}'><b>{obj.number}</b> {obj.title}</a>"
+
+
+@dataclass
+class Level:
+    """Level line at the top of the page, sort of breadcrumb"""
+
+    number: str
+    title: str
+    url: str | Path
+
+
+@dataclass
+class PageMeta:
+    title: str
+    url_to_root: str | Path
+
+
+def write_structure_page(obj: core.Base | None, levels: list[Level], links: list[str]):
+    structure_page_template = jinja_env.get_template("structure_page.html")
+    target = html_path(obj)
+    logger.debug(f"Writing {target}...")
+    if obj is None:
+        title = "JD"
+    else:
+        title = f"{obj.number} {obj.title}"
+    page_meta = PageMeta(title=title, url_to_root=JDEX_ROOT)
+    content = structure_page_template.render(
+        levels=levels, page_meta=page_meta, links=links
+    )
+    target.write_text(content)

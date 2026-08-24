@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass, field
+from functools import total_ordering
 from pathlib import Path
 
 AREA_REGEX = re.compile(r"\d0")
@@ -13,11 +14,18 @@ class Location:
     description: str | None = None
 
 
+@total_ordering
 @dataclass
 class Base:
     number: str
     title: str = ""
     path: Path | None = None
+
+    def __eq__(self, other):
+        return self.number == other.number
+
+    def __lt__(self, other):
+        return self.number < other.number
 
 
 @dataclass
@@ -68,3 +76,11 @@ class JDStructure:
         category_number = id.number[:2]
         category = self.categories[category_number]
         category.id_keys.append(id.number)
+
+    @property
+    def all(self) -> dict[str, Base]:
+        result: dict[str, Base] = {}
+        result.update(self.areas)
+        result.update(self.categories)
+        result.update(self.ids)
+        return result

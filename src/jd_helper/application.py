@@ -26,13 +26,55 @@ def print_index_to_console(jd_root: Path, selected: str | None = None):
 
 def print_cd_into_dir(jd_root: Path, number: str):
     jd_structure = disk.read_folder_structure(jd_root)
-    all: dict[str, core.Base] = {}
-    all.update(jd_structure.areas)
-    all.update(jd_structure.categories)
-    all.update(jd_structure.ids)
-    if number not in all:
+    if number not in jd_structure.all:
         print(f"An area/category/id with number {number} was not found")
         sys.exit(1)
-    found = all[number]
+    found = jd_structure.all[number]
     print(f"cd {found.path}")
     print(f"mc {found.path}")
+
+
+def _levels(*acids: core.Base) -> list[output.Level]:
+    result: list[output.Level] = []
+    result.append(
+        output.Level(
+            url=output.html_path(), number="JDEX", title="Reinouts JD structuur"
+        )
+    )
+    for acid in acids:
+        result.append(
+            output.Level(
+                url=output.html_path(acid), number=acid.number, title=acid.title
+            )
+        )
+    return result
+
+
+def export_html_pages(jd_root: Path):
+    """Export the structure and the documents as html."""
+    jd_structure = disk.read_folder_structure(jd_root)
+
+    # index (list areas), root means obj=None
+    areas = sorted(jd_structure.areas.values())
+    levels = _levels()
+    links = [output.link(area) for area in areas]
+    output.write_structure_page(obj=None, levels=levels, links=links)
+
+    # area (list categories)
+    for area in areas:
+        categories = [
+            jd_structure.categories[category_key]
+            for category_key in sorted(area.category_keys)
+        ]
+        levels = _levels(area)
+        links = [output.link(category) for category in categories]
+        output.write_structure_page(obj=area, levels=levels, links=links)
+
+        for category in categories:
+            ids = [jd_structure.ids[id_key] for id_key in sorted(category.id_keys)]
+            levels = _levels(category)
+            links = [output.link(id) for id in ids]
+            output.write_structure_page(obj=category, levels=levels, links=links)
+
+    # id (content overview)
+    # + content items

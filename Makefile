@@ -3,7 +3,7 @@
 JDEX = ~/jdex
 
 build: install
-	.venv/bin/jdh build-index
+	.venv/bin/jdh
 
 install: jdex_dir install_python install_npm style
 

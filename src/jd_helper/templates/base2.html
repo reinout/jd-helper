@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+      {{ page_meta.title|striptags|e }} - JDEX
+    </title>
+    <link rel="stylesheet"
+          href="{{ page_meta.url_to_root }}/jdex.css"
+          type="text/css" />
+  </head>
+  <body>
+    <div class="max-w-screen-xl px-4 m-auto">
+
+      {% block breadcrumbs %}
+        <div id="levels">
+          {% for level in levels %}
+            <div class="level-line">
+              <a href="{{ level.url }}">
+                <span class="number">{{ level.number }}</span>
+                <span class="title">{{ level.title }}</span>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      {% endblock %}
+
+
+      {% block full_width %}
+        <div class="grid grid-cols-[20em_auto]">
+          {% block toc %}
+          {% endblock %}
+          <div class="prose prose-vanrees">
+            {% block main %}{% endblock %}
+          </div>
+        </div>
+      {% endblock %}
+    </div>
+
+  </body>
+</html>
