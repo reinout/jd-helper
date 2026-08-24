@@ -88,10 +88,6 @@
            max-w-full;
 }
 
-/* General formatting */
-a {
-  @apply link text-secondary;
-}
 
 /* Breadcrumbs */
 #breadcrumbs {
@@ -113,4 +109,30 @@ a {
 /* TOC */
 #toc a.selected {
   @apply text-secondary-content bg-secondary;
+}
+
+
+
+/* General formatting */
+a {
+  @apply link text-secondary;
+}
+.number {
+  @apply font-mono font-bold;
+}
+
+
+
+/* Levels */
+#levels {
+  @apply pt-2 pb-2 mb-4;
+  @apply border-b-primary border-b-4;
+}
+#levels a {
+  @apply text-primary;
+}
+#levels .level-line {
+}
+#levels .level-line.last {
+  @apply text-2xl;
 }

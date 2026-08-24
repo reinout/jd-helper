@@ -47,7 +47,7 @@ def _(obj: core.ID):
 def link(obj: core.Base) -> str:
     """Return link suitable for html"""
     # TODO: numbers as fixed width font?
-    return f"<a href='{html_path(obj)}'><b>{obj.number}</b> {obj.title}</a>"
+    return f"<a href='{html_path(obj)}'><span class='number'>{obj.number}</span> {obj.title}</a>"
 
 
 @dataclass
