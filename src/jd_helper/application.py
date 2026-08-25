@@ -36,11 +36,7 @@ def print_cd_into_dir(jd_root: Path, number: str):
 
 def _levels(*acids: core.Base) -> list[output.Level]:
     result: list[output.Level] = []
-    result.append(
-        output.Level(
-            url=output.html_path(), number="JDEX", title="Reinouts JD structuur"
-        )
-    )
+    result.append(output.Level(url=output.html_path(), number="JDEX", title=""))
     for acid in acids:
         result.append(
             output.Level(
