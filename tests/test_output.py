@@ -18,7 +18,7 @@ def test_rich_text(obj, expected):
 @pytest.mark.parametrize(
     "obj,expected",
     [
-        (core.ID("12.34"), "/12.34/index.html"),
+        (core.ID("12.34"), "/12.34.html"),
         (core.Category("12"), "/12.html"),
         (core.Area("10"), "/10.html"),
     ],

@@ -16,6 +16,41 @@ class Location:
 
 @total_ordering
 @dataclass
+class Document:
+    path: Path
+    title: str = ""
+
+    def __eq__(self, other):
+        return self.path.name == other.path.name
+
+    def __lt__(self, other):
+        return self.path.name < other.path.name
+
+
+@total_ordering
+@dataclass
+class FileOrFolder:
+    path: Path
+    title: str = ""
+    extension: str = ""
+
+    def __post_init__(self):
+        if not self.title:
+            self.title = self.path.name
+        self.extension = self.path.suffix
+
+    def __eq__(self, other):
+        return self.path.name == other.path.name
+
+    def __lt__(self, other):
+        test1 = self.extension < other.extension
+        if test1:
+            return test1
+        return self.path.name < other.path.name
+
+
+@total_ordering
+@dataclass
 class Base:
     number: str
     title: str = ""
@@ -46,7 +81,23 @@ class Category(Base):
 
 @dataclass
 class ID(Base):
+    """
+    The ID actually has contents. And alternative locations ("hangmap") admin.
+
+    - Locations are found in location.txt files.
+    - Documents are md/rst/txt files that we want to render and display.
+    - Files and folders are just clickable. Should be grouped by extension (or by
+      type=folder). Images might be shown in a more friendly way, but that's outside of
+      core's purview.
+
+    Note: there are no .add_document()-like methods, these can just be added by other
+    code as they're just a list.
+
+    """
+
     locations: list[Location] = field(default_factory=list)
+    documents: list[Document] = field(default_factory=list)
+    files_and_folders: list[FileOrFolder] = field(default_factory=list)
 
     def __post_init__(self):
         assert ID_REGEX.fullmatch(self.number)
