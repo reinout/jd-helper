@@ -6,6 +6,7 @@ from jd_helper import core
 AREA_PATTERN = "[0-9]0_*"  # J0_
 CATEGORY_PATTERN = "[0-9][0-9]_*"  # JD_
 ID_PATTERN = "[0-9][0-9].[0-9][0-9]_*"  # JD.ID_
+SPECIAL_FILENAMES = ["links.txt", "locations.txt"]  # "index.md" TODO
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ def read_folder_structure(root: Path) -> core.JDStructure:
                 id.files_and_folders = find_files_and_folders(id_path)
                 id.locations = find_pointers(id_path / "locations.txt")
                 id.links = find_pointers(id_path / "links.txt")
-                # TODO: documents
+                id.documents = find_documents(id_path)
                 jd_structure.add_id(id)
 
     return jd_structure
@@ -73,7 +74,6 @@ def find_files_and_folders(path: Path) -> list[core.FileOrFolder]:
     for item in path.iterdir():
         if item.is_dir():
             result.append(core.FileOrFolder(path=item))
-            continue
         elif item.suffix in relevant_extensions:
             result.append(core.FileOrFolder(path=item))
         else:
@@ -96,3 +96,18 @@ def find_pointers(pointers_file: Path) -> list[core.Pointer]:
         return []
     lines = pointers_file.read_text().split("\n")
     return [_line_to_pointer(line) for line in lines if line.strip()]
+
+
+def find_documents(path: Path) -> list[core.Document]:
+    result: list[core.Document] = []
+    for extension in ["md", "rst", "txt"]:
+        relevant_files = path.glob(f"*.{extension}")
+        for relevant_file in relevant_files:
+            if relevant_file.name in SPECIAL_FILENAMES:
+                continue
+            content = relevant_file.read_text(errors="replace")
+            first_line = content.split("\n", maxsplit=1)[0]
+            title = first_line.lstrip("#").strip()
+            result.append(core.Document(path=relevant_file, title=title))
+
+    return result

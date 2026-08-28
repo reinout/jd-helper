@@ -2,15 +2,20 @@ import logging
 from dataclasses import dataclass
 from functools import singledispatch
 from pathlib import Path
+from urllib.parse import SplitResult, urlsplit
 
 from jinja2 import Environment, PackageLoader
 
-from jd_helper import core, pointers
+from jd_helper import core
 
 JDEX_ROOT = Path("~/jdex").expanduser()
 
 logger = logging.getLogger()
 jinja_env = Environment(loader=PackageLoader("jd_helper", "templates"))
+
+
+class UnknownSchemeError(Exception):
+    pass
 
 
 def html_path(obj: core.Base | None = None) -> Path:
@@ -52,8 +57,40 @@ def rendered_link(obj: core.Base) -> str:
 
 @rendered_link.register
 def _(obj: core.Pointer) -> str:
-    pointer = pointers.from_uri(uri=obj.uri, description=obj.description)
-    return pointer.link
+    splitted: SplitResult = urlsplit(obj.uri)
+    match splitted.scheme:
+        case "https":
+            return f"<a href='{obj.uri}'>{obj.description or 'link'}</a>"
+        case "jd":
+            # jd://12.34/
+            number = splitted.netloc
+            return f"JD '{number}'"
+        case "hangmap":
+            # hangmap://thuis/label-op-de-hangmap
+            location = splitted.netloc
+            label = splitted.path.lstrip("/")
+            return f"hangmap {location}: '{label}'"
+        case "bujo":
+            # bujo://103/34
+            number = int(splitted.netloc)
+            if number >= 100:
+                number -= 100
+                return f"grote BuJo {number:03}"
+            else:
+                return f"kleine BuJo {number:03}"
+        case _:
+            raise UnknownSchemeError(f"Scheme {splitted.scheme} not implemented")
+
+
+@rendered_link.register
+def _(obj: core.FileOrFolder) -> str:
+    return f"<a href='{obj.path.as_uri()}'>{obj.title}</a>"
+
+
+def rendered_document_link(document: core.Document, id_number: str) -> str:
+    html_filename = document.path.stem + ".html"
+    target = JDEX_ROOT / id_number / html_filename
+    return f"<a href='{target.as_uri()}'>{document.title}</a>"
 
 
 @dataclass
@@ -67,6 +104,8 @@ class Level:
 
 @dataclass
 class PageMeta:
+    """Generic page elements, needed for rendering."""
+
     title: str
     url_to_root: str | Path
 
@@ -95,11 +134,18 @@ def write_id_page(obj: core.ID, levels: list[Level]):
 
     locations = [rendered_link(location) for location in obj.locations]
     links = [rendered_link(link) for link in obj.links]
+    files_and_folders = [rendered_link(ff) for ff in sorted(obj.files_and_folders)]
+    documents = [
+        rendered_document_link(document, obj.number)
+        for document in sorted(obj.documents)
+    ]
 
     content = id_page_template.render(
         levels=levels,
         page_meta=page_meta,
         locations=locations,
         links=links,
+        files_and_folders=files_and_folders,
+        documents=documents,
     )
     target.write_text(content)
