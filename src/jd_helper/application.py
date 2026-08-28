@@ -72,5 +72,8 @@ def export_html_pages(jd_root: Path):
             links = [output.link(id) for id in ids]
             output.write_structure_page(obj=category, levels=levels, links=links)
 
+            for id in ids:
+                output.write_id_page(obj=id, levels=levels)
+
     # id (content overview)
     # + content items

@@ -78,3 +78,13 @@ def write_structure_page(obj: core.Base | None, levels: list[Level], links: list
         levels=levels, page_meta=page_meta, links=links
     )
     target.write_text(content)
+
+
+def write_id_page(obj: core.ID | None, levels: list[Level]):
+    id_page_template = jinja_env.get_template("id_page.html")
+    target = html_path(obj)
+    logger.debug(f"Writing {target}...")
+    title = f"{obj.number} {obj.title}"
+    page_meta = PageMeta(title=title, url_to_root=JDEX_ROOT)
+    content = id_page_template.render(levels=levels, page_meta=page_meta)
+    target.write_text(content)
