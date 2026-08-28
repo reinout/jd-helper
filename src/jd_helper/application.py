@@ -75,7 +75,11 @@ def export_html_pages(jd_root: Path):
 
             for id in ids:
                 levels = _levels(area, category, id)
-                output.write_id_page(obj=id, levels=levels)
+                output.write_id_page(id=id, levels=levels)
+                output.ensure_id_dir(id=id)
+
+                for document in id.documents:
+                    output.write_document_page(document=document, id=id, levels=levels)
 
     # id (content overview)
     # + content items

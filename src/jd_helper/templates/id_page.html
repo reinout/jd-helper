@@ -5,9 +5,19 @@
     <div class="row">
       <div class="column col-4">
 
+        <h2>Documenten</h2>
+        <ul>
+          {% for document in documents %}
+            <li>{{ document }}</li>
+          {% endfor %}
+        </ul>
+
+      </div>
+      <div class="column col-8">
+
         <h2>Info</h2>
         {% if locations %}
-          <h2>Locaties</h2>
+          <h3>Locaties</h3>
           <ul>
             {% for location in locations %}
               <li>{{ location }}</li>
@@ -15,31 +25,17 @@
           </ul>
         {% endif %}
         {% if links %}
-          <h2>Links</h2>
+          <h3>Links</h3>
           <ul>
             {% for link in links %}
               <li>{{ link }}</li>
             {% endfor %}
           </ul>
         {% endif %}
-
-      </div>
-      <div class="column col-4">
-
         <h2>Inhoud</h2>
         <ul>
           {% for file_or_folder in files_and_folders %}
             <li>{{ file_or_folder }}</li>
-          {% endfor %}
-        </ul>
-
-      </div>
-      <div class="column col-4">
-
-        <h2>Documenten</h2>
-        <ul>
-          {% for document in documents %}
-            <li>{{ document }}</li>
           {% endfor %}
         </ul>
 

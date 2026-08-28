@@ -4,7 +4,9 @@ from functools import singledispatch
 from pathlib import Path
 from urllib.parse import SplitResult, urlsplit
 
+from docutils.core import publish_parts
 from jinja2 import Environment, PackageLoader
+from markdown_it import MarkdownIt
 
 from jd_helper import core
 
@@ -12,6 +14,10 @@ JDEX_ROOT = Path("~/jdex").expanduser()
 
 logger = logging.getLogger()
 jinja_env = Environment(loader=PackageLoader("jd_helper", "templates"))
+
+structure_page_template = jinja_env.get_template("structure_page.html")
+id_page_template = jinja_env.get_template("id_page.html")
+document_page_template = jinja_env.get_template("document_page.html")
 
 
 class UnknownSchemeError(Exception):
@@ -111,7 +117,6 @@ class PageMeta:
 
 
 def write_structure_page(obj: core.Base | None, levels: list[Level], links: list[str]):
-    structure_page_template = jinja_env.get_template("structure_page.html")
     target = html_path(obj)
     logger.debug(f"Writing {target}...")
     if obj is None:
@@ -119,28 +124,26 @@ def write_structure_page(obj: core.Base | None, levels: list[Level], links: list
     else:
         title = f"{obj.number} {obj.title}"
     page_meta = PageMeta(title=title, url_to_root=JDEX_ROOT)
-    content = structure_page_template.render(
+    rendered_page = structure_page_template.render(
         levels=levels, page_meta=page_meta, links=links
     )
-    target.write_text(content)
+    target.write_text(rendered_page)
 
 
-def write_id_page(obj: core.ID, levels: list[Level]):
-    id_page_template = jinja_env.get_template("id_page.html")
-    target = html_path(obj)
+def write_id_page(id: core.ID, levels: list[Level]):
+    target = html_path(id)
     logger.debug(f"Writing {target}...")
-    title = f"{obj.number} {obj.title}"
+    title = f"{id.number} {id.title}"
     page_meta = PageMeta(title=title, url_to_root=JDEX_ROOT)
 
-    locations = [rendered_link(location) for location in obj.locations]
-    links = [rendered_link(link) for link in obj.links]
-    files_and_folders = [rendered_link(ff) for ff in sorted(obj.files_and_folders)]
+    locations = [rendered_link(location) for location in id.locations]
+    links = [rendered_link(link) for link in id.links]
+    files_and_folders = [rendered_link(ff) for ff in sorted(id.files_and_folders)]
     documents = [
-        rendered_document_link(document, obj.number)
-        for document in sorted(obj.documents)
+        rendered_document_link(document, id.number) for document in sorted(id.documents)
     ]
 
-    content = id_page_template.render(
+    rendered_page = id_page_template.render(
         levels=levels,
         page_meta=page_meta,
         locations=locations,
@@ -148,4 +151,45 @@ def write_id_page(obj: core.ID, levels: list[Level]):
         files_and_folders=files_and_folders,
         documents=documents,
     )
-    target.write_text(content)
+    target.write_text(rendered_page)
+
+
+def ensure_id_dir(id: core.ID):
+    id_dir = JDEX_ROOT / id.number
+    id_dir.mkdir(exist_ok=True)
+
+
+def write_document_page(document: core.Document, id: core.ID, levels: list[Level]):
+    html_filename = document.path.stem + ".html"
+    target = JDEX_ROOT / id.number / html_filename
+    logger.debug(f"Writing {target}...")
+    title = f"{id.number} → {document.title}"
+    page_meta = PageMeta(title=title, url_to_root=JDEX_ROOT)
+
+    documents = [
+        rendered_document_link(document, id.number) for document in sorted(id.documents)
+    ]
+
+    # Now on to actually rendering the current document
+    content = document.path.read_text(errors="replace")
+    match document.path.suffix:
+        case ".txt":
+            lines = content.split("\n")
+            rendered_content = "\n".join([f"<div>{line}</div>" for line in lines])
+        case ".md":
+            md = MarkdownIt("gfm-like2")
+            rendered_content = md.render(content)
+        case ".rst":
+            parts = publish_parts(content, writer_name="html5")
+            rendered_content = parts["html_body"]
+
+    edit_link = document.path.as_uri()
+
+    rendered_page = document_page_template.render(
+        levels=levels,
+        page_meta=page_meta,
+        documents=documents,
+        rendered_content=rendered_content,
+        edit_link=edit_link,
+    )
+    target.write_text(rendered_page)
