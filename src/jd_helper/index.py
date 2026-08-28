@@ -3,7 +3,7 @@ from pathlib import Path
 
 from jinja2 import Environment, PackageLoader
 
-from jd_helper import documents, folders_files, pointers, utils
+from jd_helper import documents, utils
 
 jinja_env = Environment(loader=PackageLoader("jd_helper", "templates"))
 
@@ -97,27 +97,11 @@ class Base:
         if possible_index.exists():
             return documents.MdDocument(possible_index)
 
-    @property
-    def links(self) -> list[pointers.Pointer]:
-        return pointers.pointers_from_file(self.path / "links.txt")
-
-    @property
-    def locations(self) -> list[pointers.Pointer]:
-        return pointers.pointers_from_file(self.path / "locations.txt")
-
 
 class ID(Base):
     @cached_property
     def documents(self) -> list[documents.Document]:
         return documents.find_documents(self.path)
-
-    @cached_property
-    def folders(self) -> list[folders_files.Folder]:
-        return folders_files.find_folders(self.path)
-
-    @cached_property
-    def files(self) -> list[folders_files.File]:
-        return folders_files.find_files(self.path)
 
     @property
     def toc_contents(self) -> list[utils.TocEntry]:
@@ -211,8 +195,6 @@ def build_index():
                     page=id.as_page,
                     absolute_url_base=id.absolute_url_base,
                     documents=id.documents,
-                    folders=id.folders,
-                    files=id.files,
                     current_document=None,
                 )
                 index.write_text(content)
