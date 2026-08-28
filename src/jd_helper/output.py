@@ -44,14 +44,14 @@ def _(obj: core.ID):
 
 
 @singledispatch
-def link(obj: core.Base) -> str:
+def rendered_link(obj: core.Base) -> str:
     """Return link suitable for html"""
     # TODO: numbers as fixed width font?
     return f"<a href='{html_path(obj)}'><span class='number'>{obj.number}</span> {obj.title}</a>"
 
 
-@link.register
-def _(obj: core.Location) -> str:
+@rendered_link.register
+def _(obj: core.Pointer) -> str:
     pointer = pointers.from_uri(uri=obj.uri, description=obj.description)
     return pointer.link
 
@@ -93,9 +93,13 @@ def write_id_page(obj: core.ID, levels: list[Level]):
     title = f"{obj.number} {obj.title}"
     page_meta = PageMeta(title=title, url_to_root=JDEX_ROOT)
 
-    locations = [link(location) for location in obj.locations]
+    locations = [rendered_link(location) for location in obj.locations]
+    links = [rendered_link(link) for link in obj.links]
 
     content = id_page_template.render(
-        levels=levels, page_meta=page_meta, locations=locations
+        levels=levels,
+        page_meta=page_meta,
+        locations=locations,
+        links=links,
     )
     target.write_text(content)

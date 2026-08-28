@@ -52,4 +52,4 @@ def test_build_tree():
     "uri", ["https://reinout.vanrees.org", "hangmap://kantoor/xyz"]
 )
 def test_location(uri):
-    core.Location(uri)
+    core.Pointer(uri)

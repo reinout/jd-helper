@@ -39,7 +39,8 @@ def read_folder_structure(root: Path) -> core.JDStructure:
                 id = core.ID(number=number, title=title, path=id_path)
                 # Read ID's contents
                 id.files_and_folders = find_files_and_folders(id_path)
-                id.locations = find_locations(id_path)
+                id.locations = find_pointers(id_path / "locations.txt")
+                id.links = find_pointers(id_path / "links.txt")
                 # TODO: documents
                 jd_structure.add_id(id)
 
@@ -81,18 +82,17 @@ def find_files_and_folders(path: Path) -> list[core.FileOrFolder]:
     return result
 
 
-def _line_to_location(line: str) -> core.Location:
+def _line_to_pointer(line: str) -> core.Pointer:
     if " " in line:
         uri, name = line.split(" ", 1)
-        return core.Location(uri=uri)
+        return core.Pointer(uri=uri, description=name)
     else:
-        return core.Location(uri=uri, description=name)
+        return core.Pointer(uri=line)
 
 
-def find_locations(id_path: Path) -> list[core.Location]:
-    """Return locations from locations.txt. Ok if file doesn't exist."""
-    locations_file = id_path / "locations.txt"
-    if not locations_file.exists():
+def find_pointers(pointers_file: Path) -> list[core.Pointer]:
+    """Return pointers from a file. Ok if file doesn't exist."""
+    if not pointers_file.exists():
         return []
-    lines = locations_file.read_text().split("\n")
-    return [_line_to_location(line) for line in lines if line.strip()]
+    lines = pointers_file.read_text().split("\n")
+    return [_line_to_pointer(line) for line in lines if line.strip()]

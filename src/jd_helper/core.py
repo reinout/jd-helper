@@ -9,7 +9,7 @@ ID_REGEX = re.compile(r"\d[1-9]\.\d\d")
 
 
 @dataclass
-class Location:
+class Pointer:
     uri: str
     description: str | None = None
 
@@ -85,6 +85,7 @@ class ID(Base):
     The ID actually has contents. And alternative locations ("hangmap") admin.
 
     - Locations are found in location.txt files.
+    - Links are found in link.txt files.
     - Documents are md/rst/txt files that we want to render and display.
     - Files and folders are just clickable. Should be grouped by extension (or by
       type=folder). Images might be shown in a more friendly way, but that's outside of
@@ -95,7 +96,8 @@ class ID(Base):
 
     """
 
-    locations: list[Location] = field(default_factory=list)
+    locations: list[Pointer] = field(default_factory=list)
+    links: list[Pointer] = field(default_factory=list)
     documents: list[Document] = field(default_factory=list)
     files_and_folders: list[FileOrFolder] = field(default_factory=list)
 

@@ -53,7 +53,7 @@ def export_html_pages(jd_root: Path):
     # index (list areas), root means obj=None
     areas = sorted(jd_structure.areas.values())
     levels = _levels()
-    links = [output.link(area) for area in areas]
+    links = [output.rendered_link(area) for area in areas]
     output.write_structure_page(obj=None, levels=levels, links=links)
 
     # area (list categories)
@@ -63,13 +63,13 @@ def export_html_pages(jd_root: Path):
             for category_key in sorted(area.category_keys)
         ]
         levels = _levels(area)
-        links = [output.link(category) for category in categories]
+        links = [output.rendered_link(category) for category in categories]
         output.write_structure_page(obj=area, levels=levels, links=links)
 
         for category in categories:
             ids = [jd_structure.ids[id_key] for id_key in sorted(category.id_keys)]
             levels = _levels(area, category)
-            links = [output.link(id) for id in ids]
+            links = [output.rendered_link(id) for id in ids]
             # TODO: rename to toc_items and leave .link to output
             output.write_structure_page(obj=category, levels=levels, links=links)
 

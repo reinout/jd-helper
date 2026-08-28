@@ -7,7 +7,24 @@
         een
       </div>
       <div class="column col-4">
-        twee
+
+        {% if locations %}
+          <h2>Locaties</h2>
+          <ul>
+            {% for location in locations %}
+              <li>{{ location }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if links %}
+          <h2>Links</h2>
+          <ul>
+            {% for link in links %}
+              <li>{{ link }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
       </div>
       <div class="column col-4">
         drie
