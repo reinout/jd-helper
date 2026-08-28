@@ -1,42 +1,44 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
       {{ page_meta.title|striptags|e }} - JDEX
     </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+          crossorigin="anonymous">
     <link rel="stylesheet"
           href="{{ page_meta.url_to_root }}/jdex.css"
           type="text/css" />
   </head>
   <body>
-    <div class="max-w-screen-xl px-4 m-auto">
+    <div class="container">
 
       {% block levels %}
-        <div id="levels">
+        <ul id="levels" class="nav flex-column">
           {% for level in levels %}
-            <div class="level-line {% if loop.last %}last{% endif %}">
-              <a href="{{ level.url }}">
+            <li class="nav-item {% if loop.last %}last{% endif %}">
+              <a href="{{ level.url }}"
+                 class="nav-link">
                 <span class="number">{{ level.number }}</span>
                 <span class="title">{{ level.title }}</span>
               </a>
-            </div>
+            </li>
           {% endfor %}
-        </div>
+        </ul>
       {% endblock %}
 
 
-      {% block full_width %}
-        <div class="grid grid-cols-[20em_auto]">
-          {% block toc %}
-          {% endblock %}
-          <div class="prose prose-vanrees">
-            {% block main %}{% endblock %}
-          </div>
-        </div>
+      {% block main %}
       {% endblock %}
+
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+            crossorigin="anonymous"></script>
   </body>
 </html>
