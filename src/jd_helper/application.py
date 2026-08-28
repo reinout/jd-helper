@@ -70,6 +70,7 @@ def export_html_pages(jd_root: Path):
             ids = [jd_structure.ids[id_key] for id_key in sorted(category.id_keys)]
             levels = _levels(area, category)
             links = [output.link(id) for id in ids]
+            # TODO: rename to toc_items and leave .link to output
             output.write_structure_page(obj=category, levels=levels, links=links)
 
             for id in ids:

@@ -6,7 +6,6 @@
 # I also want to read/generate them from lines in links.txt and locations.txt.
 from __future__ import annotations
 
-from pathlib import Path
 from urllib.parse import SplitResult, urlsplit
 
 
@@ -27,9 +26,9 @@ class Pointer:
     schemes: list[str] = []
     splitted: SplitResult
 
-    def __init__(self, uri: str, name: str | None = None):
+    def __init__(self, uri: str, description: str | None = None):
         self.uri = uri
-        self.name = name
+        self.description = description
         self.splitted = urlsplit(uri)
         assert self.splitted.scheme in self.schemes
 
@@ -49,7 +48,7 @@ class URLPointer(Pointer):
     @property
     def link(self) -> str:
         """Return link, suitable for html"""
-        return f"<a href='{self.uri}'>{self.name or 'link'}</a>"
+        return f"<a href='{self.uri}'>{self.description or 'link'}</a>"
 
 
 @register_schemes
@@ -103,25 +102,9 @@ class BujoPointer(Pointer):
         return f"{self.location}: pagina {self.page_number}"
 
 
-def from_uri(uri, name: str | None = None) -> Pointer:
+def from_uri(uri, description: str | None = None) -> Pointer:
     scheme, rest = uri.split("://")
     if scheme not in scheme_registry:
         raise UnknownSchemeError(f"Scheme {scheme} not registered")
     cls = scheme_registry[scheme]
-    return cls(uri, name)
-
-
-def line_to_pointer(line: str) -> Pointer:
-    if " " in line:
-        uri, name = line.split(" ", 1)
-        return from_uri(uri, name)
-    else:
-        return from_uri(line)
-
-
-def pointers_from_file(pointer_file: Path) -> list[Pointer]:
-    """Return pointers from file. Ok if file doesn't exist."""
-    if not pointer_file.exists():
-        return []
-    lines = pointer_file.read_text().split("\n")
-    return [line_to_pointer(line) for line in lines if line.strip()]
+    return cls(uri, description)

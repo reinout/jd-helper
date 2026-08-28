@@ -5,7 +5,7 @@ from pathlib import Path
 
 from jinja2 import Environment, PackageLoader
 
-from jd_helper import core
+from jd_helper import core, pointers
 
 JDEX_ROOT = Path("~/jdex").expanduser()
 
@@ -50,6 +50,12 @@ def link(obj: core.Base) -> str:
     return f"<a href='{html_path(obj)}'><span class='number'>{obj.number}</span> {obj.title}</a>"
 
 
+@link.register
+def _(obj: core.Location) -> str:
+    pointer = pointers.from_uri(uri=obj.uri, description=obj.description)
+    return pointer.link
+
+
 @dataclass
 class Level:
     """Level line at the top of the page, sort of breadcrumb"""
@@ -80,11 +86,16 @@ def write_structure_page(obj: core.Base | None, levels: list[Level], links: list
     target.write_text(content)
 
 
-def write_id_page(obj: core.ID | None, levels: list[Level]):
+def write_id_page(obj: core.ID, levels: list[Level]):
     id_page_template = jinja_env.get_template("id_page.html")
     target = html_path(obj)
     logger.debug(f"Writing {target}...")
     title = f"{obj.number} {obj.title}"
     page_meta = PageMeta(title=title, url_to_root=JDEX_ROOT)
-    content = id_page_template.render(levels=levels, page_meta=page_meta)
+
+    locations = [link(location) for location in obj.locations]
+
+    content = id_page_template.render(
+        levels=levels, page_meta=page_meta, locations=locations
+    )
     target.write_text(content)

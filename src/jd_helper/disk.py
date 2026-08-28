@@ -37,6 +37,10 @@ def read_folder_structure(root: Path) -> core.JDStructure:
                 number, title = number_and_title(id_path.name)
                 logger.debug(f"Adding {number}...")
                 id = core.ID(number=number, title=title, path=id_path)
+                # Read ID's contents
+                id.files_and_folders = find_files_and_folders(id_path)
+                id.locations = find_locations(id_path)
+                # TODO: documents
                 jd_structure.add_id(id)
 
     return jd_structure
@@ -56,3 +60,39 @@ def uris_and_titles_from_file(uri_file: Path) -> list[tuple[str, str | None]]:
         return []
     lines = uri_file.read_text().split("\n")
     return [uri_and_title_from_line(line) for line in lines if line.strip()]
+
+
+def find_files_and_folders(path: Path) -> list[core.FileOrFolder]:
+    """Return files and folders (direct children only)"""
+    logger.debug(f"Finding files and folders in {path}...")
+    result: list[core.FileOrFolder] = []
+    relevant_extensions = [".jpg", ".jpeg", ".png", ".gif", ".pdf", ".odt", ".pages"]
+    # Perhaps only exclude stuff, like md/rst/txt?
+
+    for item in path.iterdir():
+        if item.is_dir():
+            result.append(core.FileOrFolder(path=item))
+            continue
+        elif item.suffix in relevant_extensions:
+            result.append(core.FileOrFolder(path=item))
+        else:
+            logger.debug(f"Skipped file {item}")
+
+    return result
+
+
+def _line_to_location(line: str) -> core.Location:
+    if " " in line:
+        uri, name = line.split(" ", 1)
+        return core.Location(uri=uri)
+    else:
+        return core.Location(uri=uri, description=name)
+
+
+def find_locations(id_path: Path) -> list[core.Location]:
+    """Return locations from locations.txt. Ok if file doesn't exist."""
+    locations_file = id_path / "locations.txt"
+    if not locations_file.exists():
+        return []
+    lines = locations_file.read_text().split("\n")
+    return [_line_to_location(line) for line in lines if line.strip()]
