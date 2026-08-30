@@ -75,7 +75,10 @@ def _(obj: core.Pointer) -> str:
             # hangmap://thuis/label-op-de-hangmap
             location = splitted.netloc
             label = splitted.path.lstrip("/")
-            return f"hangmap {location}: '{label}'"
+            result = f"hangmap {location}: '{label}'"
+            if obj.description:
+                result += f" ({obj.description}"
+            return result
         case "bujo":
             # bujo://103/34
             number = int(splitted.netloc)

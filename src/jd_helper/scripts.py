@@ -9,7 +9,6 @@ from jd_helper import application
 logger = logging.getLogger()
 
 JD_ROOT = Path("~/jd").expanduser()
-# JDEX_ROOT = Path("~/jdex").expanduser()
 
 
 def _setup_logging(normally_quiet=True):
