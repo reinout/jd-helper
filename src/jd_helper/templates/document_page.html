@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block main %}
+  <div class="container">
+    <div class="row">
+      <div class="column col-4">
+
+        <h2>Documenten</h2>
+        <ul>
+          {% for document in documents %}
+            <li>{{ document }}</li>
+          {% endfor %}
+        </ul>
+
+      </div>
+      <div class="column col-8">
+
+        <div class="float-end">
+          <a href="{{ edit_link }}"
+             class="bi bi-pencil-square"></a>
+        </div>
+
+        {{ rendered_content }}
+
+      </div>
+    </div>
+  </div>
+{% endblock %}

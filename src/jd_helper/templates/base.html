@@ -1,58 +1,46 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-      {{ page.title|striptags|e }} - JDEX
+      {{ page_meta.title|striptags|e }} - JDEX
     </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+          crossorigin="anonymous">
     <link rel="stylesheet"
-          href="{{ page.url_to_root }}/jdex.css"
+          href="{{ page_meta.url_to_root }}/jdex.css"
           type="text/css" />
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
   </head>
   <body>
-    <div class="max-w-screen-xl px-4 m-auto">
+    <div class="container">
 
-      {% block breadcrumbs %}
-        <div id="breadcrumbs">
-          {% for parent in page.parents %}
-            <a href="{{ page.url_to_root }}/{{ parent.as_toc_entry.url }}"
-               title="{{ parent.as_toc_entry.title }}">{{ parent.as_toc_entry.number }}</a>
-            <span class="breadcrumb-separator">→</span>
+      {% block levels %}
+        <ul id="levels" class="nav flex-column">
+          {% for level in levels %}
+            <li class="nav-item {% if loop.last %}last{% endif %}">
+              <a href="{{ level.url }}"
+                 class="nav-link">
+                <span class="number">{{ level.number }}</span>
+                <span class="title">{{ level.title }}</span>
+              </a>
+            </li>
           {% endfor %}
-          <span class="main-selection-title"><b>{{ page.number }}</b>&nbsp; {{ page.title }}</span>
-        </div>
+        </ul>
       {% endblock %}
 
 
-      {% block full_width %}
-        <div class="grid grid-cols-[20em_auto]">
-          {% block toc %}
-            <ul id="toc">
-              {% for toc_entry in page.toc_contents %}
-                <li><a href="{{ page.url_to_root }}/{{ toc_entry.url }}">
-                  <b>{{ toc_entry.number }}</b> {{ toc_entry.title }}
-                </a></li>
-              {% endfor %}
-              {% for document in documents %}
-                <li>
-                  <a href="{{ page.url_to_root }}/{{ absolute_url_base }}/{{ document.html_filename }}"
-                     title="{{ document.description }}"
-                     {% if document.filename == current_document.filename %}class="selected"{% endif %}
-                  >
-                    {{ document.filename }}
-                  </a>
-                </li>
-              {% endfor %}
-
-            </ul>
-          {% endblock %}
-          <div class="prose prose-vanrees">
-            {% block main %}{% endblock %}
-          </div>
-        </div>
+      {% block main %}
       {% endblock %}
+
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+            crossorigin="anonymous"></script>
   </body>
 </html>

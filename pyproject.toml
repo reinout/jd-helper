@@ -23,9 +23,9 @@ dependencies = [
 homepage = "https://github.com/nens/jd-helper"
 
 [project.scripts]
-jdcd = "jd_helper.index:cd_into_dir"
-jdh = "jd_helper.main:main"
-jdi = "jd_helper.index:print_index"
+jdcd = "jd_helper.scripts:jdcd"
+jdh = "jd_helper.scripts:jdh"
+jdi = "jd_helper.scripts:jdi"
 
 [dependency-groups]
 # The "dev" group is automatically installed by uv. When using pip,
@@ -38,7 +38,7 @@ requires = ["setuptools>=80", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
-addopts = "--cov --cov-fail-under=50"
+addopts = "--cov --cov-fail-under=50 --cov-report term-missing"
 # Debugging tests in vscode? Run pytest with "--no-cov", see
 # https://pytest-cov.readthedocs.io/en/latest/debuggers.html
 
