@@ -51,7 +51,15 @@ def _(obj: core.Category):
 @rich_text.register
 def _(obj: core.ID):
     target = str(html_path(obj))
-    return f"[link=file://{target}][bold white]:file_folder: {obj.number}[/][/] {obj.title}"
+    result = f"[link=file://{target}][bold white]:file_folder: {obj.number}[/][/] {obj.title}"
+    relevant_locations = [
+        rendered_link(location)
+        for location in obj.locations
+        if location.scheme in ("hangmap")
+    ]
+    if relevant_locations:
+        result += f" [deep_sky_blue1](zie: {', '.join(relevant_locations)})[/]"
+    return result
 
 
 @singledispatch

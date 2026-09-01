@@ -2,6 +2,7 @@ import re
 from dataclasses import dataclass, field
 from functools import total_ordering
 from pathlib import Path
+from urllib.parse import urlsplit
 
 AREA_REGEX = re.compile(r"\d0")
 CATEGORY_REGEX = re.compile(r"\d[1-9]")
@@ -12,6 +13,11 @@ ID_REGEX = re.compile(r"\d[1-9]\.\d\d")
 class Pointer:
     uri: str
     description: str | None = None
+    scheme: str | None = None
+
+    def __post_init__(self):
+        if not self.scheme:
+            self.scheme = urlsplit(self.uri).scheme
 
 
 @total_ordering
