@@ -30,12 +30,46 @@ jdi = "jd_helper.scripts:jdi"
 [dependency-groups]
 # The "dev" group is automatically installed by uv. When using pip,
 # do something like "pip install -e . --group test".
-dev = ["pytest>=8.4.2", "pytest-cov>=6.3.0", "pytest-sugar>=1.1.1"]
+dev = [
+  "import-linter>=2.14",
+  "pytest>=8.4.2",
+  "pytest-cov>=6.3.0",
+  "pytest-sugar>=1.1.1",
+]
 
 # See https://nens-meta.readthedocs.io/en/latest/config-files.html
 [build-system]
 requires = ["setuptools>=80", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
+
+[tool.importlinter]
+root_package = "jd_helper"
+# Optional:
+include_external_packages = false
+exclude_type_checking_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Layers part 1"
+type = "layers"
+layers = [
+  "jd_helper.scripts",
+  "jd_helper.application",
+  # disk+output are both below application, but should not import each other. That's
+  # why the part 2  exists.
+  "jd_helper.disk",
+  "jd_helper.output",
+  "jd_helper.core",
+]
+
+[[tool.importlinter.contracts]]
+name = "Layers part 2"
+type = "forbidden"
+source_modules = [
+  "jd_helper.disk",
+]
+forbidden_modules = [
+  "jd_helper.output",
+]
 
 [tool.pytest.ini_options]
 addopts = "--cov --cov-fail-under=50 --cov-report term-missing"
