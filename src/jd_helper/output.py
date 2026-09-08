@@ -107,7 +107,9 @@ def _(obj: core.FileOrFolder) -> str:
 def rendered_document_link(document: core.Document, id_number: str) -> str:
     html_filename = document.path.stem + ".html"
     target = JDEX_ROOT / id_number / html_filename
-    return f"<a href='{target.as_uri()}'>{document.title}</a>"
+    return (
+        f"<a href='{target.as_uri()}' title='{document.title}'>{document.path.name}</a>"
+    )
 
 
 @dataclass
