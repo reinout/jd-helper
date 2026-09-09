@@ -109,6 +109,19 @@ class JDTree(TextualTree):
             "Descend into the current node",
             show=False,
         ),
+        # Handy p/n arrow movements.
+        Binding(
+            "p",
+            "cursor_up",
+            "Previous line",
+            show=False,
+        ),
+        Binding(
+            "n",
+            "cursor_down",
+            "Next line",
+            show=False,
+        ),
     ]
 
     @property
