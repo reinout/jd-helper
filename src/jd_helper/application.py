@@ -95,6 +95,7 @@ class JDTree(TextualTree):
         Binding("b", "open_browser", "Open browser", show=True),
         Binding("e", "open_emacs", "Open emacs", show=True),
         Binding("f", "open_finder", "Open finder", show=True),
+        Binding("m", "open_midnight_commander", "Open midnight commander", show=True),
         # Different cursor movement to the default.
         Binding(
             "left",
@@ -127,9 +128,13 @@ class JDTree(TextualTree):
         self.action_cursor_down()
 
     def action_cursor_left(self):
-        # Purpose: go up into the structure and collapse what we just left.
+        # Purpose: go up into the structure and collapse IDs.
         self.action_cursor_parent()
-        self.action_toggle_node()
+        if (
+            isinstance(self.selected_jd_item, core.Category)
+            and self.cursor_node.is_expanded
+        ):
+            self.action_toggle_node()
 
     def action_open_browser(self):
         if not self.selected_jd_item:
@@ -147,13 +152,21 @@ class JDTree(TextualTree):
             return
         subprocess.run(["open", str(self.selected_jd_item.path)])
 
+    def action_open_midnight_commander(self):
+        # Call it on the app, as that can suspend this running program and execute mc.
+        if not self.selected_jd_item:
+            return
+        self.app.action_open_midnight_commander(self.selected_jd_item.path)  # type: ignore[attr-defined]
+
     def build_tree(self):
         self.jd_structure = disk.read_folder_structure()
         self.show_root = False
         self.root.expand()
         for area_key in sorted(self.jd_structure.areas.keys()):
             area = self.jd_structure.areas[area_key]
-            area_tree = self.root.add(output.rich_text(area), data={"key": area_key})
+            area_tree = self.root.add(
+                output.rich_text(area), data={"key": area_key}, expand=True
+            )
             for category_key in sorted(area.category_keys):
                 category = self.jd_structure.categories[category_key]
                 category_tree = area_tree.add(
@@ -178,6 +191,10 @@ class JDApp(App):
         yield Header()
         yield self.build_tree()
         yield Footer()
+
+    def action_open_midnight_commander(self, path: Path):
+        with self.suspend():
+            subprocess.run(["mc", str(path)])
 
 
 def textual_something(jd_root: Path):
