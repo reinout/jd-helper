@@ -43,3 +43,12 @@ def jdh():
     """Print the full html output, this is the 'jdh' script."""
     _setup_logging()
     application.export_html_pages(jd_root=JD_ROOT)
+
+
+def jdl():
+    """Add an 'engineer log' entry to an JD or ID, this is the 'jdl' script."""
+    _setup_logging()
+    # parser = argparse.ArgumentParser(prog="jdl")
+    # parser.add_argument("number")
+    # args = parser.parse_args(sys.argv[1:])
+    application.textual_something(jd_root=JD_ROOT)

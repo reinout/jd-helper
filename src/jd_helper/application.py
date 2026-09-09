@@ -1,8 +1,14 @@
+import subprocess
 import sys
+import webbrowser
 from pathlib import Path
 
 from rich import print
 from rich.tree import Tree
+from textual.app import App
+from textual.binding import Binding
+from textual.widgets import Footer, Header
+from textual.widgets import Tree as TextualTree
 
 from jd_helper import core, disk, output
 
@@ -81,5 +87,100 @@ def export_html_pages(jd_root: Path):
                 for document in id.documents:
                     output.write_document_page(document=document, id=id, levels=levels)
 
-    # id (content overview)
-    # + content items
+
+class JDTree(TextualTree):
+    jd_structure: core.JDStructure
+
+    BINDINGS = [
+        Binding("b", "open_browser", "Open browser", show=True),
+        Binding("e", "open_emacs", "Open emacs", show=True),
+        Binding("f", "open_finder", "Open finder", show=True),
+        # Different cursor movement to the default.
+        Binding(
+            "left",
+            "cursor_left",
+            "Ascend up the tree",
+            show=False,
+        ),
+        Binding(
+            "right",
+            "cursor_right",
+            "Descend into the current node",
+            show=False,
+        ),
+    ]
+
+    @property
+    def selected_jd_item(self) -> core.Base | None:
+        if self.cursor_node.data is None:
+            return
+        key = self.cursor_node.data.get("key")
+        if not key:
+            return
+        return self.jd_structure.all[key]
+
+    def action_cursor_right(self):
+        # Purpose: go deeper into the structure. If the node isn't expanded, expand it.
+        # And after expanding, behave as cursor-down, that descends into the now-expanded node.
+        if self.cursor_node.is_collapsed:
+            self.action_toggle_node()
+        self.action_cursor_down()
+
+    def action_cursor_left(self):
+        # Purpose: go up into the structure and collapse what we just left.
+        self.action_cursor_parent()
+        self.action_toggle_node()
+
+    def action_open_browser(self):
+        if not self.selected_jd_item:
+            return
+        file_url = "file://" + str(output.html_path(self.selected_jd_item))
+        webbrowser.open(file_url)
+
+    def action_open_emacs(self):
+        if not self.selected_jd_item:
+            return
+        subprocess.run(["emacsclient", "-n", str(self.selected_jd_item.path)])
+
+    def action_open_finder(self):
+        if not self.selected_jd_item:
+            return
+        subprocess.run(["open", str(self.selected_jd_item.path)])
+
+    def build_tree(self):
+        self.jd_structure = disk.read_folder_structure()
+        self.show_root = False
+        self.root.expand()
+        for area_key in sorted(self.jd_structure.areas.keys()):
+            area = self.jd_structure.areas[area_key]
+            area_tree = self.root.add(output.rich_text(area), data={"key": area_key})
+            for category_key in sorted(area.category_keys):
+                category = self.jd_structure.categories[category_key]
+                category_tree = area_tree.add(
+                    output.rich_text(category), data={"key": category_key}
+                )
+                for id_key in sorted(category.id_keys):
+                    id = self.jd_structure.ids[id_key]
+                    category_tree.add_leaf(output.rich_text(id), data={"key": id_key})
+
+
+class JDApp(App):
+    BINDINGS = [
+        Binding("q", "quit", "Quit", show=True),
+    ]
+
+    def build_tree(self):
+        tree = JDTree("JD")
+        tree.build_tree()
+        return tree
+
+    def compose(self):
+        yield Header()
+        yield self.build_tree()
+        yield Footer()
+
+
+def textual_something(jd_root: Path):
+    # jd_structure = disk.read_folder_structure(jd_root)
+    app = JDApp()
+    app.run()
