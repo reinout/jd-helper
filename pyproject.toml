@@ -27,7 +27,6 @@ homepage = "https://github.com/nens/jd-helper"
 jdcd = "jd_helper.scripts:jdcd"
 jdh = "jd_helper.scripts:jdh"
 jdi = "jd_helper.scripts:jdi"
-jdl = "jd_helper.scripts:jdl"
 
 [dependency-groups]
 # The "dev" group is automatically installed by uv. When using pip,

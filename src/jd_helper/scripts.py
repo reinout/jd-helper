@@ -22,12 +22,9 @@ def _setup_logging(normally_quiet=True):
 
 
 def jdi():
-    """Print the index (command line). This is the 'jdi' script."""
+    """Show the TUI with the index. This is the 'jdi' script."""
     _setup_logging()
-    selected: str | None = None
-    if len(sys.argv) > 1:
-        selected = sys.argv[1]
-    application.print_index_to_console(jd_root=JD_ROOT, selected=selected)
+    application.show_index(jd_root=JD_ROOT)
 
 
 def jdcd():
@@ -43,12 +40,3 @@ def jdh():
     """Print the full html output, this is the 'jdh' script."""
     _setup_logging()
     application.export_html_pages(jd_root=JD_ROOT)
-
-
-def jdl():
-    """Add an 'engineer log' entry to an JD or ID, this is the 'jdl' script."""
-    _setup_logging()
-    # parser = argparse.ArgumentParser(prog="jdl")
-    # parser.add_argument("number")
-    # args = parser.parse_args(sys.argv[1:])
-    application.textual_something(jd_root=JD_ROOT)

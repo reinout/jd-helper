@@ -4,30 +4,13 @@ import webbrowser
 from pathlib import Path
 
 from rich import print
-from rich.tree import Tree
 from textual.app import App
 from textual.binding import Binding
+from textual.message import Message
 from textual.widgets import Footer, Header
 from textual.widgets import Tree as TextualTree
 
 from jd_helper import core, disk, output
-
-
-def print_index_to_console(jd_root: Path, selected: str | None = None):
-    # Calling "Tree" and "print" should really happen in output.py, but the tree
-    # structure is really part of the application...
-    jd_structure = disk.read_folder_structure(jd_root)
-    for area_key in sorted(jd_structure.areas.keys()):
-        area = jd_structure.areas[area_key]
-        area_tree = Tree(output.rich_text(area))
-        for category_key in sorted(area.category_keys):
-            category = jd_structure.categories[category_key]
-            category_tree = area_tree.add(output.rich_text(category))
-            if selected and selected in [area_key, category_key]:
-                for id_key in sorted(category.id_keys):
-                    id = jd_structure.ids[id_key]
-                    category_tree.add(output.rich_text(id))
-        print(area_tree)
 
 
 def print_cd_into_dir(jd_root: Path, number: str):
@@ -91,6 +74,11 @@ def export_html_pages(jd_root: Path):
 class JDTree(TextualTree):
     jd_structure: core.JDStructure
 
+    class OpenMidnightCommander(Message):
+        def __init__(self, path: Path) -> None:
+            self.path = path
+            super().__init__()
+
     BINDINGS = [
         Binding("b", "open_browser", "Open browser", show=True),
         Binding("e", "open_emacs", "Open emacs", show=True),
@@ -126,7 +114,7 @@ class JDTree(TextualTree):
 
     @property
     def selected_jd_item(self) -> core.Base | None:
-        if self.cursor_node.data is None:
+        if self.cursor_node is None or self.cursor_node.data is None:
             return
         key = self.cursor_node.data.get("key")
         if not key:
@@ -166,12 +154,12 @@ class JDTree(TextualTree):
         subprocess.run(["open", str(self.selected_jd_item.path)])
 
     def action_open_midnight_commander(self):
-        # Call it on the app, as that can suspend this running program and execute mc.
         if not self.selected_jd_item:
             return
-        self.app.action_open_midnight_commander(self.selected_jd_item.path)  # type: ignore[attr-defined]
+        # The message is, in the end, intercepted by the app.
+        self.post_message(self.OpenMidnightCommander(path=self.selected_jd_item.path))
 
-    def build_tree(self):
+    def fill_tree(self):
         self.jd_structure = disk.read_folder_structure()
         self.show_root = False
         self.root.expand()
@@ -194,23 +182,21 @@ class JDApp(App):
     BINDINGS = [
         Binding("q", "quit", "Quit", show=True),
     ]
-
-    def build_tree(self):
-        tree = JDTree("JD")
-        tree.build_tree()
-        return tree
+    jd_tree: JDTree
 
     def compose(self):
         yield Header()
-        yield self.build_tree()
+        self.jd_tree = JDTree("JD")
+        self.jd_tree.fill_tree()
+        yield self.jd_tree
         yield Footer()
 
-    def action_open_midnight_commander(self, path: Path):
+    def on_jdtree_open_midnight_commander(self, message: JDTree.OpenMidnightCommander):
         with self.suspend():
-            subprocess.run(["mc", str(path)])
+            subprocess.run(["mc", str(message.path)])
 
 
-def textual_something(jd_root: Path):
+def show_index(jd_root: Path):
     # jd_structure = disk.read_folder_structure(jd_root)
     app = JDApp()
     app.run()

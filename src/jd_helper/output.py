@@ -38,20 +38,17 @@ def rich_text(obj: core.Base) -> str:
 
 @rich_text.register
 def _(obj: core.Area):
-    target = str(html_path(obj))
-    return f"[link=file://{target}][bold green]:file_cabinet:  {obj.number}[/][/] {obj.title}"
+    return f"[bold green]:file_cabinet:  {obj.number}[/] {obj.title}"
 
 
 @rich_text.register
 def _(obj: core.Category):
-    target = str(html_path(obj))
-    return f"[link=file://{target}][bold yellow]:card_file_box:  {obj.number}[/][/] {obj.title}"
+    return f"[bold yellow]:card_file_box:  {obj.number}[/] {obj.title}"
 
 
 @rich_text.register
 def _(obj: core.ID):
-    target = str(html_path(obj))
-    result = f"[link=file://{target}][bold white]:file_folder: {obj.number}[/][/] {obj.title}"
+    result = f"[bold deep_sky_blue1]:file_folder: {obj.number}[/] {obj.title}"
     relevant_locations = [
         rendered_link(location)
         for location in obj.locations
