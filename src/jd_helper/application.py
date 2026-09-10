@@ -7,8 +7,7 @@ from rich import print
 from textual.app import App
 from textual.binding import Binding
 from textual.message import Message
-from textual.widgets import Footer, Header
-from textual.widgets import Tree as TextualTree
+from textual.widgets import Footer, Header, Tree
 
 from jd_helper import core, disk, output
 
@@ -71,7 +70,7 @@ def export_html_pages(jd_root: Path):
                     output.write_document_page(document=document, id=id, levels=levels)
 
 
-class JDTree(TextualTree):
+class JDTree(Tree):
     jd_structure: core.JDStructure
 
     class OpenMidnightCommander(Message):
