@@ -3,6 +3,8 @@ from pathlib import Path
 
 from jd_helper import core
 
+JD_ROOT = Path("~/jd").expanduser()  # Duplicated at the moment from scripts.py
+
 AREA_PATTERN = "[0-9]0_*"  # J0_
 CATEGORY_PATTERN = "[0-9][0-9]_*"  # JD_
 ID_PATTERN = "[0-9][0-9].[0-9][0-9]_*"  # JD.ID_
@@ -18,7 +20,7 @@ def number_and_title(dirname: str) -> tuple[str, str]:
     return number, title
 
 
-def read_folder_structure(root: Path) -> core.JDStructure:
+def read_folder_structure(root: Path = JD_ROOT) -> core.JDStructure:
     logger.debug(f"Reading folder structure from {root}...")
     jd_structure = core.JDStructure()
 

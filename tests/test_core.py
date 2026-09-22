@@ -35,7 +35,7 @@ def test_post_init_id2(number):
         core.ID(number=number)
 
 
-def test_build_tree():
+def test_fill_tree():
     area = core.Area("10")
     category1 = core.Category("11")
     category2 = core.Category("12")

@@ -1,27 +1,15 @@
+import subprocess
 import sys
+import webbrowser
 from pathlib import Path
 
 from rich import print
-from rich.tree import Tree
+from textual.app import App
+from textual.binding import Binding
+from textual.message import Message
+from textual.widgets import Footer, Header, Tree
 
 from jd_helper import core, disk, output
-
-
-def print_index_to_console(jd_root: Path, selected: str | None = None):
-    # Calling "Tree" and "print" should really happen in output.py, but the tree
-    # structure is really part of the application...
-    jd_structure = disk.read_folder_structure(jd_root)
-    for area_key in sorted(jd_structure.areas.keys()):
-        area = jd_structure.areas[area_key]
-        area_tree = Tree(output.rich_text(area))
-        for category_key in sorted(area.category_keys):
-            category = jd_structure.categories[category_key]
-            category_tree = area_tree.add(output.rich_text(category))
-            if selected and selected in [area_key, category_key]:
-                for id_key in sorted(category.id_keys):
-                    id = jd_structure.ids[id_key]
-                    category_tree.add(output.rich_text(id))
-        print(area_tree)
 
 
 def print_cd_into_dir(jd_root: Path, number: str):
@@ -81,5 +69,133 @@ def export_html_pages(jd_root: Path):
                 for document in id.documents:
                     output.write_document_page(document=document, id=id, levels=levels)
 
-    # id (content overview)
-    # + content items
+
+class JDTree(Tree):
+    jd_structure: core.JDStructure
+
+    class OpenMidnightCommander(Message):
+        def __init__(self, path: Path) -> None:
+            self.path = path
+            super().__init__()
+
+    BINDINGS = [
+        Binding("b", "open_browser", "Open browser", show=True),
+        Binding("e", "open_emacs", "Open emacs", show=True),
+        Binding("f", "open_finder", "Open finder", show=True),
+        Binding("m", "open_midnight_commander", "Open midnight commander", show=True),
+        # Different cursor movement to the default.
+        Binding(
+            "left",
+            "cursor_left",
+            "Ascend up the tree",
+            show=False,
+        ),
+        Binding(
+            "right",
+            "cursor_right",
+            "Descend into the current node",
+            show=False,
+        ),
+        # Handy p/n arrow movements.
+        Binding(
+            "p",
+            "cursor_up",
+            "Previous line",
+            show=False,
+        ),
+        Binding(
+            "n",
+            "cursor_down",
+            "Next line",
+            show=False,
+        ),
+    ]
+
+    @property
+    def selected_jd_item(self) -> core.Base | None:
+        if self.cursor_node is None or self.cursor_node.data is None:
+            return
+        key = self.cursor_node.data.get("key")
+        if not key:
+            return
+        return self.jd_structure.all[key]
+
+    def action_cursor_right(self):
+        # Purpose: go deeper into the structure. If the node isn't expanded, expand it.
+        # And after expanding, behave as cursor-down, that descends into the now-expanded node.
+        if self.cursor_node.is_collapsed:
+            self.action_toggle_node()
+        self.action_cursor_down()
+
+    def action_cursor_left(self):
+        # Purpose: go up into the structure and collapse IDs.
+        self.action_cursor_parent()
+        if (
+            isinstance(self.selected_jd_item, core.Category)
+            and self.cursor_node.is_expanded
+        ):
+            self.action_toggle_node()
+
+    def action_open_browser(self):
+        if not self.selected_jd_item:
+            return
+        file_url = "file://" + str(output.html_path(self.selected_jd_item))
+        webbrowser.open(file_url)
+
+    def action_open_emacs(self):
+        if not self.selected_jd_item:
+            return
+        subprocess.run(["emacsclient", "-n", str(self.selected_jd_item.path)])
+
+    def action_open_finder(self):
+        if not self.selected_jd_item:
+            return
+        subprocess.run(["open", str(self.selected_jd_item.path)])
+
+    def action_open_midnight_commander(self):
+        if not self.selected_jd_item:
+            return
+        # The message is, in the end, intercepted by the app.
+        self.post_message(self.OpenMidnightCommander(path=self.selected_jd_item.path))
+
+    def fill_tree(self):
+        self.jd_structure = disk.read_folder_structure()
+        self.show_root = False
+        self.root.expand()
+        for area_key in sorted(self.jd_structure.areas.keys()):
+            area = self.jd_structure.areas[area_key]
+            area_tree = self.root.add(
+                output.rich_text(area), data={"key": area_key}, expand=True
+            )
+            for category_key in sorted(area.category_keys):
+                category = self.jd_structure.categories[category_key]
+                category_tree = area_tree.add(
+                    output.rich_text(category), data={"key": category_key}
+                )
+                for id_key in sorted(category.id_keys):
+                    id = self.jd_structure.ids[id_key]
+                    category_tree.add_leaf(output.rich_text(id), data={"key": id_key})
+
+
+class JDApp(App):
+    BINDINGS = [
+        Binding("q", "quit", "Quit", show=True),
+    ]
+    jd_tree: JDTree
+
+    def compose(self):
+        yield Header()
+        self.jd_tree = JDTree("JD")
+        self.jd_tree.fill_tree()
+        yield self.jd_tree
+        yield Footer()
+
+    def on_jdtree_open_midnight_commander(self, message: JDTree.OpenMidnightCommander):
+        with self.suspend():
+            subprocess.run(["mc", str(message.path)])
+
+
+def show_index(jd_root: Path):
+    # jd_structure = disk.read_folder_structure(jd_root)
+    app = JDApp()
+    app.run()
