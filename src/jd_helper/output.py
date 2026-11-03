@@ -86,12 +86,14 @@ def _(obj: core.Pointer) -> str:
             return result
         case "bujo":
             # bujo://103/34
-            number = int(splitted.netloc)
-            if number >= 100:
-                number -= 100
-                return f"grote BuJo {number:03}"
-            else:
-                return f"kleine BuJo {number:03}"
+            number = int(splitted.hostname)
+            bujo_kind = (number >= 100) and "grote" or "kleine"
+            bujo_name = f"{bujo_kind} BuJo {number:03}"
+            bujo_page = splitted.path.lstrip("/")
+            result = f"{bujo_name}, pag {bujo_page}"
+            if obj.description:
+                result += f": {obj.description}"
+            return result
         case "groot":
             # groot://dir/within/groot
             location = splitted.netloc + splitted.path

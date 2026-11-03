@@ -44,7 +44,11 @@ def test_html_path(obj, expected):
         ),
         (core.Pointer("hangmap://thuis/layout"), "hangmap thuis: 'layout'"),
         (core.Pointer("hangmap://thuis/layout", description="heel mooi"), "heel mooi"),
-        (core.Pointer("bujo://103/78"), "grote BuJo 003"),
+        (core.Pointer("bujo://103/78"), "grote BuJo 103, pag 78"),
+        (
+            core.Pointer("bujo://103/78", description="Ergens over"),
+            "grote BuJo 103, pag 78: Ergens over",
+        ),
     ],
 )
 def test_rendered_link_pointer(pointer, expected):
