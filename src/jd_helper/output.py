@@ -18,6 +18,7 @@ jinja_env = Environment(loader=PackageLoader("jd_helper", "templates"))
 structure_page_template = jinja_env.get_template("structure_page.html")
 id_page_template = jinja_env.get_template("id_page.html")
 document_page_template = jinja_env.get_template("document_page.html")
+document_print_page_template = jinja_env.get_template("document_print_page.html")
 
 
 class UnknownSchemeError(Exception):
@@ -181,7 +182,9 @@ def ensure_id_dir(id: core.ID):
 
 def write_document_page(document: core.Document, id: core.ID, levels: list[Level]):
     html_filename = document.path.stem + ".html"
+    print_html_filename = document.path.stem + "-print.html"
     target = JDEX_ROOT / id.number / html_filename
+    print_target = JDEX_ROOT / id.number / print_html_filename
     logger.debug(f"Writing {target}...")
     title = f"{id.number} → {document.title}"
     page_meta = PageMeta(title=title, url_to_root=JDEX_ROOT)
@@ -204,6 +207,7 @@ def write_document_page(document: core.Document, id: core.ID, levels: list[Level
             rendered_content = parts["html_body"]
 
     edit_link = document.path.as_uri()
+    print_link = print_target.as_uri()
 
     rendered_page = document_page_template.render(
         levels=levels,
@@ -211,5 +215,12 @@ def write_document_page(document: core.Document, id: core.ID, levels: list[Level
         documents=documents,
         rendered_content=rendered_content,
         edit_link=edit_link,
+        print_link=print_link,
     )
     target.write_text(rendered_page)
+
+    rendered_print_page = document_print_page_template.render(
+        page_meta=page_meta,
+        rendered_content=rendered_content,
+    )
+    print_target.write_text(rendered_print_page)
