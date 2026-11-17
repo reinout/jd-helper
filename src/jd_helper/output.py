@@ -76,7 +76,7 @@ def _(obj: core.Pointer) -> str:
         case "jd":
             # jd://12.34/
             number = splitted.netloc
-            return f"JD '{number}'"
+            return f"<a href='{JDEX_ROOT}/{number}.html'>JD '{number}' {obj.description}</a>"
         case "hangmap":
             # hangmap://thuis/label-op-de-hangmap
             location = splitted.netloc
